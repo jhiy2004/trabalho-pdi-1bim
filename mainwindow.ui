@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>501</width>
+    <height>386</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QLabel" name="input_image">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>20</y>
+      <width>131</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="output_image">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>20</y>
+      <width>131</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="channel_1">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>200</y>
+      <width>131</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="channel_2">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>200</y>
+      <width>131</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="channel_3">
+    <property name="geometry">
+     <rect>
+      <x>340</x>
+      <y>190</y>
+      <width>131</width>
+      <height>131</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menuBar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>501</width>
+     <height>23</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuMenu">
+    <property name="title">
+     <string>Menu</string>
+    </property>
+    <addaction name="actionCarregar_imagem"/>
+    <addaction name="actionEscala_Cinza"/>
+    <addaction name="actionEscala_Cinza_Inversa"/>
+    <addaction name="actionColorida_Inversa"/>
+    <addaction name="actionSeparar_canais_de_cores"/>
+    <addaction name="actionSal_e_pimenta"/>
+    <addaction name="separator"/>
+    <addaction name="actionFiltro_3x3"/>
+   </widget>
+   <addaction name="menuMenu"/>
+  </widget>
+  <action name="actionEscala_Cinza">
+   <property name="text">
+    <string>Escala Cinza</string>
+   </property>
+  </action>
+  <action name="actionEscala_Cinza_Inversa">
+   <property name="text">
+    <string>Escala Cinza Inversa</string>
+   </property>
+  </action>
+  <action name="actionColorida_Inversa">
+   <property name="text">
+    <string>Colorida Inversa</string>
+   </property>
+  </action>
+  <action name="actionSeparar_canais_de_cores">
+   <property name="text">
+    <string>Separar canais de cores</string>
+   </property>
+  </action>
+  <action name="actionCarregar_imagem">
+   <property name="text">
+    <string>Carregar imagem</string>
+   </property>
+  </action>
+  <action name="actionSal_e_pimenta">
+   <property name="text">
+    <string>Sal e pimenta</string>
+   </property>
+  </action>
+  <action name="actionFiltro_3x3">
+   <property name="text">
+    <string>Filtro 3x3</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>

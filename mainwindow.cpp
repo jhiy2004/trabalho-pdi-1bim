@@ -1,0 +1,180 @@
+#include "mainwindow.h"
+#include "./ui_mainwindow.h"
+#include <iostream>
+
+MainWindow::MainWindow(QWidget *parent)
+    : QMainWindow(parent),
+    ui(new Ui::MainWindow)
+{
+    ui->setupUi(this);
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+QImage img;
+
+void MainWindow::on_actionEscala_Cinza_triggered()
+{
+    QImage mod = img;
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+
+    for(int i=0; i < mod.height(); i++){
+        for(int j=0; j < mod.width(); j++){
+            QRgb color = mod.pixel(j, i);
+            int res = static_cast<int>(0.299f * qRed(color) + 0.587f * qGreen(color) + 0.114f * qBlue(color));
+
+            QRgb cinza = qRgb(res, res, res);
+            mod.setPixel(j, i, cinza);
+        }
+    }
+
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+void MainWindow::on_actionCarregar_imagem_triggered()
+{
+    QString filename = QFileDialog::getOpenFileName(this, "Open a file", ".");
+    img.load(filename);
+
+    int w = ui->input_image->width();
+    int h = ui->input_image->height();
+    QPixmap pix(filename);
+    ui->input_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+void MainWindow::on_actionEscala_Cinza_Inversa_triggered()
+{
+    QImage mod = img;
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+
+    for(int i=0; i < mod.height(); i++){
+        for(int j=0; j < mod.width(); j++){
+            QRgb color = mod.pixel(j, i);
+            int res = 255 - static_cast<int>(0.299f * qRed(color) + 0.587f * qGreen(color) + 0.114f * qBlue(color));
+
+            QRgb cinza = qRgb(res, res, res);
+            mod.setPixel(j, i, cinza);
+        }
+    }
+
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+
+void MainWindow::on_actionColorida_Inversa_triggered()
+{
+    QImage mod = img;
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+
+    for(int i=0; i < mod.height(); i++){
+        for(int j=0; j < mod.width(); j++){
+            QRgb color = mod.pixel(j, i);
+            QRgb inv_color = qRgb(255 - qRed(color), 255 - qGreen(color), 255 - qBlue(color));
+            mod.setPixel(j, i, inv_color);
+        }
+    }
+
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+
+void MainWindow::on_actionSeparar_canais_de_cores_triggered()
+{
+    QImage red_channel = img;
+    QImage green_channel = img;
+    QImage blue_channel = img;
+
+
+    for(int i=0; i < img.height(); i++){
+        for(int j=0; j < img.width(); j++){
+            QRgb color = img.pixel(j, i);
+
+            red_channel.setPixel(j, i, qRgb(qRed(color), 0, 0));
+            green_channel.setPixel(j, i, qRgb(0, qGreen(color), 0));
+            blue_channel.setPixel(j, i, qRgb(0, 0, qBlue(color)));
+        }
+    }
+
+    QPixmap red_pix = QPixmap::fromImage(red_channel);
+    QPixmap green_pix = QPixmap::fromImage(green_channel);
+    QPixmap blue_pix = QPixmap::fromImage(blue_channel);
+
+    int w = ui->channel_1->width();
+    int h = ui->channel_1->height();
+    ui->channel_1->setPixmap(red_pix.scaled(w, h, Qt::KeepAspectRatio));
+
+    w = ui->channel_2->width();
+    h = ui->channel_2->height();
+    ui->channel_2->setPixmap(green_pix.scaled(w, h, Qt::KeepAspectRatio));
+
+    w = ui->channel_3->width();
+    h = ui->channel_3->height();
+    ui->channel_3->setPixmap(blue_pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+
+void MainWindow::on_actionSal_e_pimenta_triggered()
+{
+    if (img.isNull()) {
+        qDebug() << "Erro: Imagem não carregada corretamente!";
+        return;
+    }
+
+    QImage mod = img;
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+
+    int tamanho = img.width() * img.height();
+    int nRuido = tamanho / 10; // 10% dos pixels serão ruídos
+    int x, y, c;
+
+    for(int i = 0; i < nRuido; i++) {
+        x = QRandomGenerator::global()->bounded(img.width());
+        y = QRandomGenerator::global()->bounded(img.height());
+        c = QRandomGenerator::global()->bounded(2) * 255; // 0 (pimenta) ou 255 (sal)
+
+        qDebug() << "X:" << x << " Y:" << y << " Cor:" << c; // Verifica os valores gerados
+
+        QRgb new_c = qRgb(c, c, c);
+        img.setPixel(x, y, new_c);
+    }
+
+    QPixmap pix = QPixmap::fromImage(img);
+    ui->input_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+//TODO: finish this function
+void MainWindow::on_actionFiltro_3x3_triggered()
+{
+    QImage mod = img;
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+
+}
