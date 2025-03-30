@@ -37,6 +37,8 @@ private slots:
 
     void on_actionFiltro_3x3_triggered();
 
+    void on_output_to_input_btn_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

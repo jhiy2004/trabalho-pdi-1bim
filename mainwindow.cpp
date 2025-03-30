@@ -154,8 +154,6 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
         y = QRandomGenerator::global()->bounded(img.height());
         c = QRandomGenerator::global()->bounded(2) * 255; // 0 (pimenta) ou 255 (sal)
 
-        qDebug() << "X:" << x << " Y:" << y << " Cor:" << c; // Verifica os valores gerados
-
         QRgb new_c = qRgb(c, c, c);
         img.setPixel(x, y, new_c);
     }
@@ -178,3 +176,14 @@ void MainWindow::on_actionFiltro_3x3_triggered()
     int h = ui->output_image->height();
 
 }
+
+void MainWindow::on_output_to_input_btn_clicked()
+{
+    QPixmap output_pix = ui->output_image->pixmap();
+    int w = output_pix.width();
+    int h = output_pix.height();
+
+    img = output_pix.toImage();
+    ui->input_image->setPixmap(output_pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
