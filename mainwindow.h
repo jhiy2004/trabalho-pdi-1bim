@@ -7,6 +7,7 @@
 #include <QPixmap>
 #include <QRandomGenerator>
 #include <QDebug>
+#include <QInputDialog>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -35,9 +36,13 @@ private slots:
 
     void on_actionSal_e_pimenta_triggered();
 
-    void on_actionFiltro_3x3_triggered();
-
     void on_output_to_input_btn_clicked();
+
+    void on_actionFiltro_mediana_triggered();
+
+    void on_actionFiltro_m_dia_triggered();
+
+    void on_actionBinarizar_triggered();
 
 private:
     Ui::MainWindow *ui;
