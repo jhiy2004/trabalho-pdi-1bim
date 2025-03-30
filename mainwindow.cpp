@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <iostream>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -159,22 +158,7 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
     }
 
     QPixmap pix = QPixmap::fromImage(img);
-    ui->input_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
-}
-
-//TODO: finish this function
-void MainWindow::on_actionFiltro_3x3_triggered()
-{
-    QImage mod = img;
-
-    // Garante que o formato da imagem é compatível com setPixel()
-    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
-        mod = mod.convertToFormat(QImage::Format_RGB32);
-    }
-
-    int w = ui->output_image->width();
-    int h = ui->output_image->height();
-
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 void MainWindow::on_output_to_input_btn_clicked()
@@ -185,5 +169,78 @@ void MainWindow::on_output_to_input_btn_clicked()
 
     img = output_pix.toImage();
     ui->input_image->setPixmap(output_pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+
+void MainWindow::on_actionFiltro_mediana_triggered()
+{
+    QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int matrix[9];
+            matrix[0] = qRed(img.pixel(j-1, i-1));
+            matrix[1] = qRed(img.pixel(j-1, i));
+            matrix[2] = qRed(img.pixel(j-1, i+1));
+            matrix[3] = qRed(img.pixel(j, i-1));
+            matrix[4] = qRed(img.pixel(j, i));
+            matrix[5] = qRed(img.pixel(j, i+1));
+            matrix[6] = qRed(img.pixel(j+1, i-1));
+            matrix[7] = qRed(img.pixel(j+1, i));
+            matrix[8] = qRed(img.pixel(j+1, i+1));
+
+            std::sort(matrix, matrix + 9);
+
+            int median = matrix[4];
+
+            QRgb color = qRgb(median, median, median);
+            mod.setPixel(j-1, i-1, color);
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+void MainWindow::on_actionFiltro_m_dia_triggered()
+{
+    QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int sum=0;
+            sum += qRed(img.pixel(j-1, i-1));
+            sum += qRed(img.pixel(j-1, i));
+            sum += qRed(img.pixel(j-1, i+1));
+            sum += qRed(img.pixel(j, i-1));
+            sum += qRed(img.pixel(j, i));
+            sum += qRed(img.pixel(j, i+1));
+            sum += qRed(img.pixel(j+1, i-1));
+            sum += qRed(img.pixel(j+1, i));
+            sum += qRed(img.pixel(j+1, i+1));
+
+            int media = sum/9;
+
+            QRgb color = qRgb(media, media, media);
+            mod.setPixel(j-1, i-1, color);
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 

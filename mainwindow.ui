@@ -168,7 +168,8 @@
     <addaction name="actionColorida_Inversa"/>
     <addaction name="actionSeparar_canais_de_cores"/>
     <addaction name="actionSal_e_pimenta"/>
-    <addaction name="actionFiltro_3x3"/>
+    <addaction name="actionFiltro_mediana"/>
+    <addaction name="actionFiltro_m_dia"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -203,9 +204,14 @@
     <string>Sal e pimenta</string>
    </property>
   </action>
-  <action name="actionFiltro_3x3">
+  <action name="actionFiltro_mediana">
    <property name="text">
-    <string>Filtro 3x3</string>
+    <string>Filtro mediana</string>
+   </property>
+  </action>
+  <action name="actionFiltro_m_dia">
+   <property name="text">
+    <string>Filtro média</string>
    </property>
   </action>
  </widget>
