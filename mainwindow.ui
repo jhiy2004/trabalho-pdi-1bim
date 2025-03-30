@@ -170,6 +170,7 @@
     <addaction name="actionSal_e_pimenta"/>
     <addaction name="actionFiltro_mediana"/>
     <addaction name="actionFiltro_m_dia"/>
+    <addaction name="actionBinarizar"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -212,6 +213,11 @@
   <action name="actionFiltro_m_dia">
    <property name="text">
     <string>Filtro média</string>
+   </property>
+  </action>
+  <action name="actionBinarizar">
+   <property name="text">
+    <string>Binarizar</string>
    </property>
   </action>
  </widget>

@@ -244,3 +244,28 @@ void MainWindow::on_actionFiltro_m_dia_triggered()
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
+
+void MainWindow::on_actionBinarizar_triggered()
+{
+    bool ok=false;
+    int threshold = QInputDialog::getInt(this, tr("Digite o limiar"),
+                                tr("Limiar:"), 128, 0, 255, 1, &ok);
+
+    if(ok){
+        QImage mod = img;
+
+        for(int i=0; i < img.height(); ++i){
+            for(int j=0; j < img.width(); ++j){
+                int color = qRed(img.pixel(j, i));
+                color = (color >= threshold) ? 255 : 0;
+
+                mod.setPixel(j, i, qRgb(color, color, color));
+            }
+        }
+        QPixmap pix = QPixmap::fromImage(mod);
+
+        int w = ui->output_image->width();
+        int h = ui->output_image->height();
+        ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    }
+}
