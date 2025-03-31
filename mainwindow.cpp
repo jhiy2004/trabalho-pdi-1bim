@@ -163,12 +163,12 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
 
 void MainWindow::on_output_to_input_btn_clicked()
 {
-    QPixmap output_pix = ui->output_image->pixmap();
-    int w = output_pix.width();
-    int h = output_pix.height();
+    const QPixmap* output_pix = ui->output_image->pixmap();
+    int w = output_pix->width();
+    int h = output_pix->height();
 
-    img = output_pix.toImage();
-    ui->input_image->setPixmap(output_pix.scaled(w, h, Qt::KeepAspectRatio));
+    img = output_pix->toImage();
+    ui->input_image->setPixmap(output_pix->scaled(w, h, Qt::KeepAspectRatio));
 }
 
 
