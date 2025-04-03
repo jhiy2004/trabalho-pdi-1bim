@@ -3,7 +3,7 @@
 - [ ] Implementar equalização da imagem
 - [x] Implementar filtro da média e da mediana
 - [x] Implementar a binarização da imagem
-- [ ] Implementar o laplaciano da vizinhança 4
+- [x] Implementar o laplaciano da vizinhança 4
 [
 [0, -1, 0],
 [-1, 4, -1],

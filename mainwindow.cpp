@@ -269,3 +269,35 @@ void MainWindow::on_actionBinarizar_triggered()
         ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
     }
 }
+
+void MainWindow::on_actionLaplaciano_triggered()
+{
+    QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int sum=0;
+            sum += -qRed(img.pixel(j-1, i));
+            sum += -qRed(img.pixel(j, i-1));
+            sum += 4*qRed(img.pixel(j, i));
+            sum += -qRed(img.pixel(j, i+1));
+            sum += -qRed(img.pixel(j+1, i));
+
+            int laplaciano = qBound(0, sum, 255);
+
+            QRgb color = qRgb(laplaciano, laplaciano, laplaciano);
+            mod.setPixel(j-1, i-1, color);
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+

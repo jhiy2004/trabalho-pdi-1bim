@@ -44,6 +44,8 @@ private slots:
 
     void on_actionBinarizar_triggered();
 
+    void on_actionLaplaciano_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
