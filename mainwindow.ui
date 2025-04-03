@@ -161,7 +161,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>23</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenu">
@@ -184,6 +184,8 @@
     <addaction name="actionFiltro_m_dia"/>
     <addaction name="actionBinarizar"/>
     <addaction name="actionLaplaciano"/>
+    <addaction name="actionEqualiza_o"/>
+    <addaction name="actionCanal_Vermelho_em_Cinza"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -236,6 +238,16 @@
   <action name="actionLaplaciano">
    <property name="text">
     <string>Laplaciano</string>
+   </property>
+  </action>
+  <action name="actionEqualiza_o">
+   <property name="text">
+    <string>Equalização</string>
+   </property>
+  </action>
+  <action name="actionCanal_Vermelho_em_Cinza">
+   <property name="text">
+    <string>Separar canais em cinza</string>
    </property>
   </action>
  </widget>

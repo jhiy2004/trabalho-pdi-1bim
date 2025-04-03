@@ -46,6 +46,10 @@ private slots:
 
     void on_actionLaplaciano_triggered();
 
+    void on_actionEqualiza_o_triggered();
+
+    void on_actionCanal_Vermelho_em_Cinza_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

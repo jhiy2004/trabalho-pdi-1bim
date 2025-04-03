@@ -163,12 +163,12 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
 
 void MainWindow::on_output_to_input_btn_clicked()
 {
-    const QPixmap* output_pix = ui->output_image->pixmap();
-    int w = output_pix->width();
-    int h = output_pix->height();
+    QPixmap output_pix = ui->output_image->pixmap();
+    int w = output_pix.width();
+    int h = output_pix.height();
 
-    img = output_pix->toImage();
-    ui->input_image->setPixmap(output_pix->scaled(w, h, Qt::KeepAspectRatio));
+    img = output_pix.toImage();
+    ui->input_image->setPixmap(output_pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 
@@ -299,5 +299,80 @@ void MainWindow::on_actionLaplaciano_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+}
+
+
+void MainWindow::on_actionEqualiza_o_triggered()
+{
+    int largura = img.width();
+    int altura = img.height();
+    int tamanho = largura * altura;
+
+    QVector<int> histograma(256, 0);
+    for (int y = 0; y < altura; ++y) {
+        for (int x = 0; x < largura; ++x) {
+            int intensidade = qGray(img.pixel(x, y));
+            histograma[intensidade]++;
+        }
+    }
+
+    QVector<int> cdf(256, 0);
+    cdf[0] = histograma[0];
+    for (int i = 1; i < 256; ++i) {
+        cdf[i] = cdf[i - 1] + histograma[i];
+    }
+
+    QVector<int> novaIntensidade(256, 0);
+    for (int i = 0; i < 256; ++i) {
+        novaIntensidade[i] = qRound(((cdf[i] - cdf[0]) / double(tamanho - cdf[0])) * 255);
+    }
+
+    QImage imagemEqualizada(largura, altura, QImage::Format_Grayscale8);
+    for (int y = 0; y < altura; ++y) {
+        for (int x = 0; x < largura; ++x) {
+            int intensidade = qGray(img.pixel(x, y));
+            int novaInt = novaIntensidade[intensidade];
+            imagemEqualizada.setPixel(x, y, qRgb(novaInt, novaInt, novaInt));
+        }
+    }
+
+    img = imagemEqualizada;
+    ui->output_image->setPixmap(QPixmap::fromImage(img));
+}
+
+
+void MainWindow::on_actionCanal_Vermelho_em_Cinza_triggered()
+{
+    int largura = img.width();
+    int altura = img.height();
+    QImage red_channel = img;
+    QImage green_channel = img;
+    QImage blue_channel = img;
+
+    for(int i = 0; i < altura; ++i){
+        for(int j = 0; j < largura; ++j){
+            QRgb color = img.pixel(j, i);
+
+            red_channel.setPixel(j, i, qRgb(qRed(color), qRed(color), qRed(color)));
+            green_channel.setPixel(j, i, qRgb(qGreen(color), qGreen(color), qGreen(color)));
+            blue_channel.setPixel(j, i, qRgb(qBlue(color), qBlue(color), qBlue(color)));
+        }
+    }
+
+    QPixmap red_pix = QPixmap::fromImage(red_channel);
+    QPixmap green_pix = QPixmap::fromImage(green_channel);
+    QPixmap blue_pix = QPixmap::fromImage(blue_channel);
+
+    int l = ui->channel_1->width();
+    int a = ui->channel_1->height();
+    ui->channel_1->setPixmap(red_pix.scaled(l, a, Qt::KeepAspectRatio));
+
+    l = ui->channel_2->width();
+    a = ui->channel_2->height();
+    ui->channel_2->setPixmap(green_pix.scaled(l, a, Qt::KeepAspectRatio));
+
+    l = ui->channel_3->width();
+    a = ui->channel_3->height();
+    ui->channel_3->setPixmap(blue_pix.scaled(l, a, Qt::KeepAspectRatio));
 }
 
