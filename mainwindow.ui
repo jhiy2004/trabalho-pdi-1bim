@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1855</width>
-    <height>847</height>
+    <width>1280</width>
+    <height>861</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -15,6 +15,18 @@
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>1280</width>
+    <height>720</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>1920</width>
+    <height>1080</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -148,8 +160,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1855</width>
-     <height>21</height>
+     <width>1280</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenu">
@@ -171,6 +183,7 @@
     <addaction name="actionFiltro_mediana"/>
     <addaction name="actionFiltro_m_dia"/>
     <addaction name="actionBinarizar"/>
+    <addaction name="actionLaplaciano"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -218,6 +231,11 @@
   <action name="actionBinarizar">
    <property name="text">
     <string>Binarizar</string>
+   </property>
+  </action>
+  <action name="actionLaplaciano">
+   <property name="text">
+    <string>Laplaciano</string>
    </property>
   </action>
  </widget>
