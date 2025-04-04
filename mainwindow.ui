@@ -185,6 +185,8 @@
     <addaction name="actionBinarizar"/>
     <addaction name="actionLaplaciano"/>
     <addaction name="actionEqualiza_o"/>
+    <addaction name="actionRGB_para_HSV"/>
+    <addaction name="actionHSV_para_RGB"/>
     <addaction name="actionCanal_Vermelho_em_Cinza"/>
    </widget>
    <addaction name="menuMenu"/>
@@ -248,6 +250,16 @@
   <action name="actionCanal_Vermelho_em_Cinza">
    <property name="text">
     <string>Separar canais em cinza</string>
+   </property>
+  </action>
+  <action name="actionRGB_para_HSV">
+   <property name="text">
+    <string>RGB para HSV</string>
+   </property>
+  </action>
+  <action name="actionHSV_para_RGB">
+   <property name="text">
+    <string>HSV para RGB</string>
    </property>
   </action>
  </widget>

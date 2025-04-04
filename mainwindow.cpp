@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -374,5 +375,137 @@ void MainWindow::on_actionCanal_Vermelho_em_Cinza_triggered()
     l = ui->channel_3->width();
     a = ui->channel_3->height();
     ui->channel_3->setPixmap(blue_pix.scaled(l, a, Qt::KeepAspectRatio));
+}
+
+
+void MainWindow::on_actionRGB_para_HSV_triggered()
+{
+    bool ok;
+    int R = QInputDialog::getInt(this, "Entrada RGB", "Digite o valor de R (0-255):", 0, 0, 255, 1, &ok);
+    if (!ok) return;
+    int G = QInputDialog::getInt(this, "Entrada RGB", "Digite o valor de G (0-255):", 0, 0, 255, 1, &ok);
+    if (!ok) return;
+    int B = QInputDialog::getInt(this, "Entrada RGB", "Digite o valor de B (0-255):", 0, 0, 255, 1, &ok);
+    if (!ok) return;
+
+    // Normalizando RGB
+    float r = R / 255.0;
+    float g = G / 255.0;
+    float b = B / 255.0;
+
+    // Obtendo V
+    float V = std::max({r, g, b});
+
+    // Obtendo S
+    float min_val = std::min({r, g, b});
+    float delta = V - min_val;
+
+    float S;
+
+    if(V == 0){
+        S = 0;
+    }else{
+        S = delta / V;
+    }
+
+    // Obtendo H
+    float H;
+
+    if(delta == 0){
+        H = 0;
+    }else{
+        if(V == r){
+            H = 60 * fmod(((g - b) / delta), 6);
+        }
+        if(V == g){
+            H = 60 * ((b - r) / delta + 2);
+        }
+        if(V == b){
+            H = 60 * ((r - g) / delta + 4);
+        }
+    }
+
+    if(H < 0){
+        H += 360;
+    }
+
+    // Transformo em porcentagem
+    S = S * 100;
+    V = V * 100;
+
+    // Apenas para testar
+    QColor color(R, G, B);
+
+    int h, s, v;
+
+    color.getHsv(&h, &s, &v);
+
+    QString result2 = QString("HSV:\nH: %1\nS: %2\nV: %3").arg(h).arg(s).arg(v);
+    QMessageBox::information(this, "Resultado HSV", result2);
+    //
+
+    QString result = QString("HSV:\nH: %1\nS: %2\nV: %3").arg(H).arg(S).arg(V);
+    QMessageBox::information(this, "Resultado HSV", result);
+}
+
+
+void MainWindow::on_actionHSV_para_RGB_triggered()
+{
+    bool ok;
+    int H = QInputDialog::getInt(this, "Entrada HSV", "Digite o valor de H (0-360):", 0, 0, 360, 1, &ok);
+    if (!ok) return;
+    int Si = QInputDialog::getInt(this, "Entrada HSV", "Digite o valor de S (0-100):", 0, 0, 100, 1, &ok);
+    if (!ok) return;
+    int Vi = QInputDialog::getInt(this, "Entrada HSV", "Digite o valor de V (0-100):", 0, 0, 100, 1, &ok);
+    if (!ok) return;
+
+    float S = Si / 100.0;
+    float V = Vi / 100.0;
+
+    float C = V * S;
+
+    float X = C * (1 - abs(fmod((H / 60), 2) - 1));
+
+    float m = V - C;
+
+    int r, g, b;
+
+    if(0 <= H && H < 60){
+        r = C;
+        g = X;
+        b = 0;
+    }
+    if(60 <= H && H < 120){
+        r = X;
+        g = C;
+        b = 0;
+    }
+    if(120 <= H && H < 180){
+        r = 0;
+        g = C;
+        b = X;
+    }
+    if(180 <= H && H < 240){
+        r = 0;
+        g = X;
+        b = C;
+    }
+    if(240 <= H && H < 300){
+        r = X;
+        g = 0;
+        b = C;
+    }
+    if(300 <= H && H < 360){
+        r = C;
+        g = 0;
+        b = X;
+    }
+
+    float R = (r + m) * 255;
+    float G = (g + m) * 255;
+    float B = (b + m) * 255;
+
+    QString result = QString("RGB:\nR: %1\nG: %2\nB: %3").arg(R).arg(G).arg(B);
+    QMessageBox::information(this, "Resultado RGB", result);
 }
 

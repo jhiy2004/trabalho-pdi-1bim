@@ -50,6 +50,10 @@ private slots:
 
     void on_actionCanal_Vermelho_em_Cinza_triggered();
 
+    void on_actionRGB_para_HSV_triggered();
+
+    void on_actionHSV_para_RGB_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
