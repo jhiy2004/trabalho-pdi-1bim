@@ -56,6 +56,8 @@ private slots:
 
     void on_actionCompress_o_de_Escala_Din_mica_triggered();
 
+    void on_actionBordas_por_Sobel_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

@@ -189,6 +189,7 @@
     <addaction name="actionRGB_para_HSV"/>
     <addaction name="actionHSV_para_RGB"/>
     <addaction name="actionCompress_o_de_Escala_Din_mica"/>
+    <addaction name="actionBordas_por_Sobel"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -266,6 +267,11 @@
   <action name="actionCompress_o_de_Escala_Din_mica">
    <property name="text">
     <string>Compressão de Escala Dinâmica</string>
+   </property>
+  </action>
+  <action name="actionBordas_por_Sobel">
+   <property name="text">
+    <string>Bordas por Sobel</string>
    </property>
   </action>
  </widget>

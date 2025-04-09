@@ -534,3 +534,42 @@ void MainWindow::on_actionCompress_o_de_Escala_Din_mica_triggered()
     ui->output_image->setPixmap(QPixmap::fromImage(image));
 }
 
+
+void MainWindow::on_actionBordas_por_Sobel_triggered()
+{
+    QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int sumY=0;
+            sumY += -2 * qGray(img.pixel(j, i-1));
+            sumY += -1 * qGray(img.pixel(j-1, i-1));
+            sumY += -1 * qGray(img.pixel(j+1, i-1));
+            sumY += 2 * qGray(img.pixel(j, i+1));
+            sumY += qGray(img.pixel(j+1, i+1));
+            sumY += qGray(img.pixel(j-1, i+1));
+
+            int sumX=0;
+            sumX += -2 * qGray(img.pixel(j-1, i));
+            sumX += -1 * qGray(img.pixel(j-1, i-1));
+            sumX += -1 * qGray(img.pixel(j-1, i+1));
+            sumX += 2 * qGray(img.pixel(j+1, i));
+            sumX += qGray(img.pixel(j+1, i+1));
+            sumX += qGray(img.pixel(j+1, i-1));
+
+            int magnitude = qSqrt(sumX * sumX + sumY * sumY);
+            magnitude = qBound(0, magnitude, 255);
+
+            QRgb color = qRgb(magnitude, magnitude, magnitude);
+            mod.setPixel(j-1, i-1, color);
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(mod);
+    ui->output_image->setPixmap(QPixmap::fromImage(mod));
+}
+
