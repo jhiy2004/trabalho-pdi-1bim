@@ -164,13 +164,15 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
 
 void MainWindow::on_output_to_input_btn_clicked()
 {
-    QPixmap output_pix = ui->output_image->pixmap();
-    int w = output_pix.width();
-    int h = output_pix.height();
+    const QPixmap* output_pix = ui->output_image->pixmap();
+    if (!output_pix || output_pix->isNull())
+        return;
 
-    img = output_pix.toImage();
-    ui->input_image->setPixmap(output_pix.scaled(w, h, Qt::KeepAspectRatio));
+    img = output_pix->toImage(); // This is still valid, not deprecated
+    QPixmap scaledPix = output_pix->scaled(output_pix->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    ui->input_image->setPixmap(scaledPix);
 }
+
 
 
 void MainWindow::on_actionFiltro_mediana_triggered()
@@ -431,17 +433,6 @@ void MainWindow::on_actionRGB_para_HSV_triggered()
     // Transformo em porcentagem
     S = S * 100;
     V = V * 100;
-
-    // Apenas para testar
-    QColor color(R, G, B);
-
-    int h, s, v;
-
-    color.getHsv(&h, &s, &v);
-
-    QString result2 = QString("HSV:\nH: %1\nS: %2\nV: %3").arg(h).arg(s).arg(v);
-    QMessageBox::information(this, "Resultado HSV", result2);
-    //
 
     QString result = QString("HSV:\nH: %1\nS: %2\nV: %3").arg(H).arg(S).arg(V);
     QMessageBox::information(this, "Resultado HSV", result);

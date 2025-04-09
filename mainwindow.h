@@ -8,6 +8,7 @@
 #include <QRandomGenerator>
 #include <QDebug>
 #include <QInputDialog>
+#include <QtMath>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
