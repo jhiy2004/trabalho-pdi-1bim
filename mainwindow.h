@@ -54,6 +54,8 @@ private slots:
 
     void on_actionHSV_para_RGB_triggered();
 
+    void on_actionCompress_o_de_Escala_Din_mica_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

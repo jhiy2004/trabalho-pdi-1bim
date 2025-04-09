@@ -179,6 +179,7 @@
     <addaction name="actionEscala_Cinza_Inversa"/>
     <addaction name="actionColorida_Inversa"/>
     <addaction name="actionSeparar_canais_de_cores"/>
+    <addaction name="actionCanal_Vermelho_em_Cinza"/>
     <addaction name="actionSal_e_pimenta"/>
     <addaction name="actionFiltro_mediana"/>
     <addaction name="actionFiltro_m_dia"/>
@@ -187,7 +188,7 @@
     <addaction name="actionEqualiza_o"/>
     <addaction name="actionRGB_para_HSV"/>
     <addaction name="actionHSV_para_RGB"/>
-    <addaction name="actionCanal_Vermelho_em_Cinza"/>
+    <addaction name="actionCompress_o_de_Escala_Din_mica"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -260,6 +261,11 @@
   <action name="actionHSV_para_RGB">
    <property name="text">
     <string>HSV para RGB</string>
+   </property>
+  </action>
+  <action name="actionCompress_o_de_Escala_Din_mica">
+   <property name="text">
+    <string>Compressão de Escala Dinâmica</string>
    </property>
   </action>
  </widget>

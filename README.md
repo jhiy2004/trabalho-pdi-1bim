@@ -10,4 +10,4 @@
 [0, -1, 0]
 ]
 - [ ] Implementar a detecção de bordas por sobel(Quando se passar o mouse sobre a imagem de saída, apresentar as informações de magnitude e direção em caixas de texto)
-- [ ] Implementar a compressão de escala dinâmica
+- [x] Implementar a compressão de escala dinâmica

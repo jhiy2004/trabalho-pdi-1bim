@@ -337,8 +337,7 @@ void MainWindow::on_actionEqualiza_o_triggered()
         }
     }
 
-    img = imagemEqualizada;
-    ui->output_image->setPixmap(QPixmap::fromImage(img));
+    ui->output_image->setPixmap(QPixmap::fromImage(imagemEqualizada));
 }
 
 
@@ -507,5 +506,31 @@ void MainWindow::on_actionHSV_para_RGB_triggered()
 
     QString result = QString("RGB:\nR: %1\nG: %2\nB: %3").arg(R).arg(G).arg(B);
     QMessageBox::information(this, "Resultado RGB", result);
+}
+
+
+void MainWindow::on_actionCompress_o_de_Escala_Din_mica_triggered()
+{
+    bool ok;
+    double c = QInputDialog::getDouble(this, "Entrada", "Digite o valor de C (0-1):", 1.0, 0.0, 1.0, 4, &ok);
+    if (!ok) return;
+    double y = QInputDialog::getDouble(this, "Entrada", "Digite o valor de Y:", 1.0, -1000000.0, 1000000.0, 4, &ok);
+    if (!ok) return;
+
+    int largura = img.width();
+    int altura = img.height();
+    QImage image = img;
+
+    for(int i = 0; i < altura; ++i){
+        for(int j = 0; j < largura; ++j){
+            int intensidade = qGray(img.pixel(j, i));
+            double r = intensidade / 255.0;
+            double S = c * pow(r, y);
+            int valorFinal = qBound(0, static_cast<int>(S * 255.0), 255);
+            image.setPixel(j, i, qRgb(valorFinal, valorFinal, valorFinal));
+        }
+    }
+
+    ui->output_image->setPixmap(QPixmap::fromImage(image));
 }
 
