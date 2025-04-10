@@ -8,6 +8,7 @@
 #include <QRandomGenerator>
 #include <QDebug>
 #include <QInputDialog>
+#include <QtMath>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -45,6 +46,18 @@ private slots:
     void on_actionBinarizar_triggered();
 
     void on_actionLaplaciano_triggered();
+
+    void on_actionEqualiza_o_triggered();
+
+    void on_actionCanal_Vermelho_em_Cinza_triggered();
+
+    void on_actionRGB_para_HSV_triggered();
+
+    void on_actionHSV_para_RGB_triggered();
+
+    void on_actionCompress_o_de_Escala_Din_mica_triggered();
+
+    void on_actionBordas_por_Sobel_triggered();
 
 private:
     Ui::MainWindow *ui;
