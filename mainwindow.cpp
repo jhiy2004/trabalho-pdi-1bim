@@ -337,7 +337,11 @@ void MainWindow::on_actionEqualiza_o_triggered()
         }
     }
 
-    ui->output_image->setPixmap(QPixmap::fromImage(imagemEqualizada));
+    QPixmap pix = QPixmap::fromImage(imagemEqualizada);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 
@@ -531,7 +535,11 @@ void MainWindow::on_actionCompress_o_de_Escala_Din_mica_triggered()
         }
     }
 
-    ui->output_image->setPixmap(QPixmap::fromImage(image));
+    QPixmap pix = QPixmap::fromImage(image);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 
@@ -569,7 +577,11 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
             mod.setPixel(j-1, i-1, color);
         }
     }
+
     QPixmap pix = QPixmap::fromImage(mod);
-    ui->output_image->setPixmap(QPixmap::fromImage(mod));
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
