@@ -59,6 +59,8 @@ private slots:
 
     void on_actionBordas_por_Sobel_triggered();
 
+    void on_actionLimiariza_o_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
