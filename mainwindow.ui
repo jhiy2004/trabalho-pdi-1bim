@@ -190,6 +190,7 @@
     <addaction name="actionHSV_para_RGB"/>
     <addaction name="actionCompress_o_de_Escala_Din_mica"/>
     <addaction name="actionBordas_por_Sobel"/>
+    <addaction name="actionLimiariza_o"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -272,6 +273,11 @@
   <action name="actionBordas_por_Sobel">
    <property name="text">
     <string>Bordas por Sobel</string>
+   </property>
+  </action>
+  <action name="actionLimiariza_o">
+   <property name="text">
+    <string>Limiarização</string>
    </property>
   </action>
  </widget>

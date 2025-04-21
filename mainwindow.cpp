@@ -164,12 +164,12 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
 
 void MainWindow::on_output_to_input_btn_clicked()
 {
-    const QPixmap* output_pix = ui->output_image->pixmap();
-    if (!output_pix || output_pix->isNull())
+    QPixmap output_pix = ui->output_image->pixmap();
+    if (!output_pix || output_pix.isNull())
         return;
 
-    img = output_pix->toImage(); // This is still valid, not deprecated
-    QPixmap scaledPix = output_pix->scaled(output_pix->size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+    img = output_pix.toImage();
+    QPixmap scaledPix = output_pix.scaled(output_pix.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
     ui->input_image->setPixmap(scaledPix);
 }
 
@@ -576,3 +576,28 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
+
+void MainWindow::on_actionLimiariza_o_triggered()
+{
+    bool ok=false;
+    int threshold = QInputDialog::getInt(this, tr("Digite o limiar"),
+                                         tr("Limiar:"), 128, 0, 255, 1, &ok);
+
+    if(ok){
+        QImage mod = img;
+
+        for(int i=0; i < img.height(); ++i){
+            for(int j=0; j < img.width(); ++j){
+                int color = qRed(img.pixel(j, i));
+                color = (color >= threshold) ? color : 0;
+
+                mod.setPixel(j, i, qRgb(color, color, color));
+            }
+        }
+        QPixmap pix = QPixmap::fromImage(mod);
+
+        int w = ui->output_image->width();
+        int h = ui->output_image->height();
+        ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    }
+}
