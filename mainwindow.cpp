@@ -476,47 +476,40 @@ void MainWindow::on_actionHSV_para_RGB_triggered()
     float V = Vi / 100.0;
 
     float C = V * S;
-
-    float X = C * (1 - abs(fmod((H / 60), 2) - 1));
-
+    float X = C * (1 - fabs(fmod((H / 60.0), 2) - 1));
     float m = V - C;
 
-    int r, g, b;
+    float r = 0, g = 0, b = 0;
 
-    if(0 <= H && H < 60){
+    if (0 <= H && H < 60) {
         r = C;
         g = X;
         b = 0;
-    }
-    if(60 <= H && H < 120){
+    } else if (60 <= H && H < 120) {
         r = X;
         g = C;
         b = 0;
-    }
-    if(120 <= H && H < 180){
+    } else if (120 <= H && H < 180) {
         r = 0;
         g = C;
         b = X;
-    }
-    if(180 <= H && H < 240){
+    } else if (180 <= H && H < 240) {
         r = 0;
         g = X;
         b = C;
-    }
-    if(240 <= H && H < 300){
+    } else if (240 <= H && H < 300) {
         r = X;
         g = 0;
         b = C;
-    }
-    if(300 <= H && H < 360){
+    } else if (300 <= H && H < 360) {
         r = C;
         g = 0;
         b = X;
     }
 
-    float R = (r + m) * 255;
-    float G = (g + m) * 255;
-    float B = (b + m) * 255;
+    int R = qRound((r + m) * 255);
+    int G = qRound((g + m) * 255);
+    int B = qRound((b + m) * 255);
 
     QString result = QString("RGB:\nR: %1\nG: %2\nB: %3").arg(R).arg(G).arg(B);
     QMessageBox::information(this, "Resultado RGB", result);
