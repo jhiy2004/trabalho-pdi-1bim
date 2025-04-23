@@ -155,10 +155,10 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
         c = QRandomGenerator::global()->bounded(2) * 255; // 0 (pimenta) ou 255 (sal)
 
         QRgb new_c = qRgb(c, c, c);
-        img.setPixel(x, y, new_c);
+        mod.setPixel(x, y, new_c);
     }
 
-    QPixmap pix = QPixmap::fromImage(img);
+    QPixmap pix = QPixmap::fromImage(mod);
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
@@ -282,21 +282,40 @@ void MainWindow::on_actionLaplaciano_triggered()
         mod = mod.convertToFormat(QImage::Format_RGB32);
     }
 
+    std::vector<std::vector<int>> magnitudes;
+    int min_magnitude = INT_MAX;
+    int max_magnitude = INT_MIN;
+
     for(int i=1; i < img.height() - 1; ++i){
+        std::vector<int> row;
         for(int j=1; j < img.width() - 1; ++j){
             int sum=0;
-            sum += -qRed(img.pixel(j-1, i));
-            sum += -qRed(img.pixel(j, i-1));
-            sum += 4*qRed(img.pixel(j, i));
-            sum += -qRed(img.pixel(j, i+1));
-            sum += -qRed(img.pixel(j+1, i));
+            sum += -qGray(img.pixel(j-1, i));
+            sum += -qGray(img.pixel(j, i-1));
+            sum += 4*qGray(img.pixel(j, i));
+            sum += -qGray(img.pixel(j, i+1));
+            sum += -qGray(img.pixel(j+1, i));
 
-            int laplaciano = qBound(0, sum, 255);
+            row.push_back(sum);
 
-            QRgb color = qRgb(laplaciano, laplaciano, laplaciano);
-            mod.setPixel(j-1, i-1, color);
+            if (sum < min_magnitude) min_magnitude = sum;
+            if (sum > max_magnitude) max_magnitude = sum;
+        }
+        magnitudes.push_back(row);
+    }
+
+    for(int i=0; i < img.height() - 2; ++i){
+        for(int j=0; j < img.width() - 2; ++j){
+            int magnitude = magnitudes[i][j];
+            int norm = 0;
+            if (max_magnitude != min_magnitude) {
+                norm = (magnitude - min_magnitude) * 255 / (max_magnitude - min_magnitude);
+            }
+            QRgb color = qRgb(norm, norm, norm);
+            mod.setPixel(j, i, color);
         }
     }
+
     QPixmap pix = QPixmap::fromImage(mod);
 
     int w = ui->output_image->width();
@@ -538,34 +557,51 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
 {
     QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
 
-    // Garante que o formato da imagem é compatível com setPixel()
     if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
         mod = mod.convertToFormat(QImage::Format_RGB32);
     }
 
-    for(int i=1; i < img.height() - 1; ++i){
-        for(int j=1; j < img.width() - 1; ++j){
-            int sumY=0;
-            sumY += -2 * qGray(img.pixel(j, i-1));
-            sumY += -1 * qGray(img.pixel(j-1, i-1));
-            sumY += -1 * qGray(img.pixel(j+1, i-1));
-            sumY += 2 * qGray(img.pixel(j, i+1));
-            sumY += qGray(img.pixel(j+1, i+1));
-            sumY += qGray(img.pixel(j-1, i+1));
+    std::vector<std::vector<int>> magnitudes;
+    int min_magnitude = INT_MAX;
+    int max_magnitude = INT_MIN;
 
-            int sumX=0;
-            sumX += -2 * qGray(img.pixel(j-1, i));
-            sumX += -1 * qGray(img.pixel(j-1, i-1));
-            sumX += -1 * qGray(img.pixel(j-1, i+1));
-            sumX += 2 * qGray(img.pixel(j+1, i));
-            sumX += qGray(img.pixel(j+1, i+1));
-            sumX += qGray(img.pixel(j+1, i-1));
+    for(int i = 1; i < img.height() - 1; ++i){
+        std::vector<int> row;
+        for(int j = 1; j < img.width() - 1; ++j){
+            int sumY = 0;
+            sumY += -2 * qGray(img.pixel(j, i - 1));
+            sumY += -1 * qGray(img.pixel(j - 1, i - 1));
+            sumY += -1 * qGray(img.pixel(j + 1, i - 1));
+            sumY += 2 * qGray(img.pixel(j, i + 1));
+            sumY += qGray(img.pixel(j + 1, i + 1));
+            sumY += qGray(img.pixel(j - 1, i + 1));
+
+            int sumX = 0;
+            sumX += -2 * qGray(img.pixel(j - 1, i));
+            sumX += -1 * qGray(img.pixel(j - 1, i - 1));
+            sumX += -1 * qGray(img.pixel(j - 1, i + 1));
+            sumX += 2 * qGray(img.pixel(j + 1, i));
+            sumX += qGray(img.pixel(j + 1, i + 1));
+            sumX += qGray(img.pixel(j + 1, i - 1));
 
             int magnitude = qSqrt(sumX * sumX + sumY * sumY);
-            magnitude = qBound(0, magnitude, 255);
+            row.push_back(magnitude);
 
-            QRgb color = qRgb(magnitude, magnitude, magnitude);
-            mod.setPixel(j-1, i-1, color);
+            if (magnitude < min_magnitude) min_magnitude = magnitude;
+            if (magnitude > max_magnitude) max_magnitude = magnitude;
+        }
+        magnitudes.push_back(row);
+    }
+
+    for (int i = 0; i < mod.height(); ++i) {
+        for (int j = 0; j < mod.width(); ++j) {
+            int magnitude = magnitudes[i][j];
+            int norm = 0;
+            if (max_magnitude != min_magnitude) {
+                norm = (magnitude - min_magnitude) * 255 / (max_magnitude - min_magnitude);
+            }
+            QRgb color = qRgb(norm, norm, norm);
+            mod.setPixel(j, i, color);
         }
     }
 
@@ -575,7 +611,6 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
-
 
 void MainWindow::on_actionLimiariza_o_triggered()
 {
