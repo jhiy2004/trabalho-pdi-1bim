@@ -24,6 +24,14 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+private:
+    QImage sobelImage;
+    std::vector<std::vector<int>> magnitudes;
+    bool sobelAtivo = false;
+
+protected:
+    bool eventFilter(QObject *obj, QEvent *event) override;
+
 private slots:
     void on_actionEscala_Cinza_triggered();
 

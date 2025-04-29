@@ -1,12 +1,17 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include <QMessageBox>
+#include <QMouseEvent>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->output_image->setMouseTracking(true);
+
+    ui->output_image->installEventFilter(this); // Captura eventos do mouse
 }
 
 MainWindow::~MainWindow()
@@ -554,7 +559,6 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
         mod = mod.convertToFormat(QImage::Format_RGB32);
     }
 
-    std::vector<std::vector<int>> magnitudes;
     int min_magnitude = INT_MAX;
     int max_magnitude = INT_MIN;
 
@@ -598,12 +602,51 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
         }
     }
 
-    QPixmap pix = QPixmap::fromImage(mod);
+    sobelImage = mod; // Salva a imagem para referência posterior
+    sobelAtivo = true;
 
-    int w = ui->output_image->width();
-    int h = ui->output_image->height();
-    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    QPixmap pix = QPixmap::fromImage(mod);
+    ui->output_image->setPixmap(pix.scaled(ui->output_image->width(), ui->output_image->height(), Qt::KeepAspectRatio));
 }
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if (obj == ui->output_image && event->type() == QEvent::MouseMove && sobelAtivo) {
+        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+
+        if (sobelImage.isNull()) return true;
+
+        QSize labelSize = ui->output_image->size();
+        QSize imgSize = sobelImage.size();
+
+        double scale = std::min(labelSize.width() / static_cast<double>(imgSize.width()),
+                                labelSize.height() / static_cast<double>(imgSize.height()));
+
+        int displayedWidth = imgSize.width() * scale;
+        int displayedHeight = imgSize.height() * scale;
+
+        int offsetX = (labelSize.width() - displayedWidth) / 2;
+        int offsetY = (labelSize.height() - displayedHeight) / 2;
+
+        QPointF pos = mouseEvent->position();
+
+        int imgX = (pos.x() - offsetX) / scale;
+        int imgY = (pos.y() - offsetY) / scale;
+
+        if (imgX >= 0 && imgX < static_cast<int>(magnitudes[0].size()) &&
+            imgY >= 0 && imgY < static_cast<int>(magnitudes.size())) {
+
+            int mag = magnitudes[imgY][imgX];
+            ui->magnitude_label->setText(QString("Magnitude: %1").arg(mag));
+        } else {
+            ui->magnitude_label->clear();
+        }
+
+        return true;
+    }
+    return QMainWindow::eventFilter(obj, event);
+}
+
 
 void MainWindow::on_actionLimiariza_o_triggered()
 {
