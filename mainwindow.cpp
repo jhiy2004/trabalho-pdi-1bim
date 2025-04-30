@@ -559,12 +559,17 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
         mod = mod.convertToFormat(QImage::Format_RGB32);
     }
 
+    magnitudes.clear();
+    angles.clear();
+
     int min_magnitude = INT_MAX;
     int max_magnitude = INT_MIN;
 
-    for(int i = 1; i < img.height() - 1; ++i){
+    for (int i = 1; i < img.height() - 1; ++i) {
         std::vector<int> row;
-        for(int j = 1; j < img.width() - 1; ++j){
+        std::vector<float> angleRow;
+
+        for (int j = 1; j < img.width() - 1; ++j) {
             int sumY = 0;
             sumY += -2 * qGray(img.pixel(j, i - 1));
             sumY += -1 * qGray(img.pixel(j - 1, i - 1));
@@ -582,12 +587,20 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
             sumX += qGray(img.pixel(j + 1, i - 1));
 
             int magnitude = qSqrt(sumX * sumX + sumY * sumY);
+
+            float angle = qAtan2(sumY, sumX) * (180.0 / M_PI); // -180° a 180°
+            if (angle < 0)
+                angle += 360.0; // converte para 0° a 360°
+
             row.push_back(magnitude);
+            angleRow.push_back(angle);
 
             if (magnitude < min_magnitude) min_magnitude = magnitude;
             if (magnitude > max_magnitude) max_magnitude = magnitude;
         }
+
         magnitudes.push_back(row);
+        angles.push_back(angleRow);
     }
 
     for (int i = 0; i < mod.height(); ++i) {
@@ -645,8 +658,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
             if (imgX >= 0 && imgX < imageSize.width() &&
                 imgY >= 0 && imgY < imageSize.height()) {
-                int mag = qGray(sobelImage.pixel(imgX, imgY));
-                ui->magnitude_label->setText(QString("Magnitude: %1").arg(mag));
+
+                int mag = magnitudes[imgY][imgX];
+                float angle = angles[imgY][imgX];
+                ui->magnitude_label->setText(QString("Magnitude: %1 | Direção: %2°").arg(mag).arg(angle, 0, 'f', 1));
             } else {
                 ui->magnitude_label->clear();
             }
@@ -662,7 +677,6 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
     return QMainWindow::eventFilter(obj, event);
 }
-
 
 void MainWindow::on_actionLimiariza_o_triggered()
 {
