@@ -612,52 +612,52 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 {
-    if (obj == ui->output_image && event->type() == QEvent::MouseMove && sobelAtivo) {
-        QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
+    if (obj == ui->output_image && sobelAtivo) {
 
-        if (sobelImage.isNull()) return true;
+        if (event->type() == QEvent::MouseMove) {
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent*>(event);
 
-        QPoint pos = mouseEvent->pos();
+            if (sobelImage.isNull()) return true;
 
-        // Tamanho do label e da imagem
-        QSize labelSize = ui->output_image->size();
-        QSize imageSize = sobelImage.size();
+            QPoint pos = mouseEvent->pos();
 
-        // Calcula escala mantendo proporção
-        double scale = qMin(
-            static_cast<double>(labelSize.width()) / imageSize.width(),
-            static_cast<double>(labelSize.height()) / imageSize.height()
-            );
+            QSize labelSize = ui->output_image->size();
+            QSize imageSize = sobelImage.size();
 
-        // Tamanho da imagem escalada
-        QSize scaledSize = imageSize * scale;
+            double scale = qMin(
+                static_cast<double>(labelSize.width()) / imageSize.width(),
+                static_cast<double>(labelSize.height()) / imageSize.height()
+                );
 
-        // Offset da imagem dentro do QLabel (centralizado)
-        int offsetX = (labelSize.width() - scaledSize.width()) / 2;
-        int offsetY = (labelSize.height() - scaledSize.height()) / 2;
+            QSize scaledSize = imageSize * scale;
 
-        // Verifica se o mouse está dentro da área da imagem desenhada
-        if (pos.x() < offsetX || pos.x() >= offsetX + scaledSize.width() ||
-            pos.y() < offsetY || pos.y() >= offsetY + scaledSize.height()) {
-            ui->magnitude_label->clear();
+            int offsetX = (labelSize.width() - scaledSize.width()) / 2;
+            int offsetY = (labelSize.height() - scaledSize.height()) / 2;
+
+            if (pos.x() < offsetX || pos.x() >= offsetX + scaledSize.width() ||
+                pos.y() < offsetY || pos.y() >= offsetY + scaledSize.height()) {
+                ui->magnitude_label->clear();
+                return true;
+            }
+
+            int imgX = (pos.x() - offsetX) * imageSize.width() / scaledSize.width();
+            int imgY = (pos.y() - offsetY) * imageSize.height() / scaledSize.height();
+
+            if (imgX >= 0 && imgX < imageSize.width() &&
+                imgY >= 0 && imgY < imageSize.height()) {
+                int mag = qGray(sobelImage.pixel(imgX, imgY));
+                ui->magnitude_label->setText(QString("Magnitude: %1").arg(mag));
+            } else {
+                ui->magnitude_label->clear();
+            }
+
             return true;
         }
 
-        // Mapeia posição do mouse para coordenada na imagem original
-        int imgX = (pos.x() - offsetX) * imageSize.width() / scaledSize.width();
-        int imgY = (pos.y() - offsetY) * imageSize.height() / scaledSize.height();
-
-        // Verifica limites e exibe magnitude
-        if (imgX >= 0 && imgX < imageSize.width() &&
-            imgY >= 0 && imgY < imageSize.height()) {
-
-            int mag = qGray(sobelImage.pixel(imgX, imgY));
-            ui->magnitude_label->setText(QString("Magnitude: %1").arg(mag));
-        } else {
+        if (event->type() == QEvent::Leave) {
             ui->magnitude_label->clear();
+            return true;
         }
-
-        return true;
     }
 
     return QMainWindow::eventFilter(obj, event);

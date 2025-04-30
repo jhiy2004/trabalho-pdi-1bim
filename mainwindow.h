@@ -27,6 +27,7 @@ public:
 private:
     QImage sobelImage;
     std::vector<std::vector<int>> magnitudes;
+    std::vector<std::vector<float>> angles;
     bool sobelAtivo = false;
 
 protected:
