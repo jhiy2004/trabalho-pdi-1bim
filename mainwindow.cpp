@@ -287,37 +287,18 @@ void MainWindow::on_actionLaplaciano_triggered()
         mod = mod.convertToFormat(QImage::Format_RGB32);
     }
 
-    std::vector<std::vector<int>> magnitudes;
-    int min_magnitude = INT_MAX;
-    int max_magnitude = INT_MIN;
-
     for(int i=1; i < img.height() - 1; ++i){
-        std::vector<int> row;
         for(int j=1; j < img.width() - 1; ++j){
-            int sum=0;
+            int sum = 0;
             sum += -qGray(img.pixel(j-1, i));
             sum += -qGray(img.pixel(j, i-1));
-            sum += 4*qGray(img.pixel(j, i));
+            sum +=  4*qGray(img.pixel(j, i));
             sum += -qGray(img.pixel(j, i+1));
             sum += -qGray(img.pixel(j+1, i));
 
-            row.push_back(sum);
+            int new_color = qBound(0, sum, 255);
 
-            if (sum < min_magnitude) min_magnitude = sum;
-            if (sum > max_magnitude) max_magnitude = sum;
-        }
-        magnitudes.push_back(row);
-    }
-
-    for(int i=0; i < img.height() - 2; ++i){
-        for(int j=0; j < img.width() - 2; ++j){
-            int magnitude = magnitudes[i][j];
-            int norm = 0;
-            if (max_magnitude != min_magnitude) {
-                norm = (magnitude - min_magnitude) * 255 / (max_magnitude - min_magnitude);
-            }
-            QRgb color = qRgb(norm, norm, norm);
-            mod.setPixel(j, i, color);
+            mod.setPixel(j-1, i-1, qRgb(new_color, new_color, new_color));
         }
     }
 
