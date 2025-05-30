@@ -20,6 +20,11 @@ MainWindow::~MainWindow()
 }
 
 QImage img;
+QImage res;
+
+std::vector<std::vector<float>> dct;
+float dct_min = std::numeric_limits<float>::max();
+float dct_max = std::numeric_limits<float>::lowest();
 
 void MainWindow::on_actionEscala_Cinza_triggered()
 {
@@ -41,6 +46,7 @@ void MainWindow::on_actionEscala_Cinza_triggered()
     QPixmap pix = QPixmap::fromImage(mod);
 
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 void MainWindow::on_actionCarregar_imagem_triggered()
@@ -74,6 +80,7 @@ void MainWindow::on_actionEscala_Cinza_Inversa_triggered()
     QPixmap pix = QPixmap::fromImage(mod);
 
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -95,6 +102,7 @@ void MainWindow::on_actionColorida_Inversa_triggered()
     QPixmap pix = QPixmap::fromImage(mod);
 
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -165,17 +173,18 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
 
     QPixmap pix = QPixmap::fromImage(mod);
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 void MainWindow::on_output_to_input_btn_clicked()
 {
-    QPixmap output_pix = ui->output_image->pixmap();
-    if (!output_pix || output_pix.isNull())
-        return;
+    QPixmap pix = QPixmap::fromImage(res);
 
-    img = output_pix.toImage();
-    QPixmap scaledPix = output_pix.scaled(output_pix.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    ui->input_image->setPixmap(scaledPix);
+    int w = ui->input_image->width();
+    int h = ui->input_image->height();
+    ui->input_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+
+    img = res;
 }
 
 
@@ -215,6 +224,7 @@ void MainWindow::on_actionFiltro_mediana_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 void MainWindow::on_actionFiltro_m_dia_triggered()
@@ -250,6 +260,7 @@ void MainWindow::on_actionFiltro_m_dia_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -275,6 +286,7 @@ void MainWindow::on_actionBinarizar_triggered()
         int w = ui->output_image->width();
         int h = ui->output_image->height();
         ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
     }
 }
 
@@ -307,6 +319,7 @@ void MainWindow::on_actionLaplaciano_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -349,6 +362,7 @@ void MainWindow::on_actionEqualiza_o_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = imagemEqualizada;
 }
 
 
@@ -529,6 +543,7 @@ void MainWindow::on_actionCompress_o_de_Escala_Din_mica_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = image;
 }
 
 
@@ -602,6 +617,7 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
 
     QPixmap pix = QPixmap::fromImage(mod);
     ui->output_image->setPixmap(pix.scaled(ui->output_image->width(), ui->output_image->height(), Qt::KeepAspectRatio));
+    res = mod;
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -681,5 +697,99 @@ void MainWindow::on_actionLimiariza_o_triggered()
         int w = ui->output_image->width();
         int h = ui->output_image->height();
         ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
     }
+}
+
+void MainWindow::on_actionDCT_triggered()
+{
+    dct.clear();
+
+    QImage mod(img.size(), QImage::Format_RGB32);
+    const int m = img.height();
+    const int n = img.width();
+
+    float ci, cj, dct1, sum;
+
+    qDebug() << "img size: " << n << "x" << m << "\n";
+
+
+    for (int i = 0; i < m; ++i) {
+        std::vector<float> row_values;
+        for (int j = 0; j < n; ++j) {
+            ci = (i == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
+            cj = (j == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
+
+            sum = 0.0f;
+            for (int k = 0; k < m; ++k) {
+                for (int l = 0; l < n; ++l) {
+                    dct1 = qGray(img.pixel(l, k)) *
+                           qCos((2 * k + 1) * i * M_PI / (2.0f * m)) *
+                           qCos((2 * l + 1) * j * M_PI / (2.0f * n));
+                    sum += dct1;
+                }
+            }
+
+            float value = ci * cj * sum;
+            row_values.push_back(value);
+
+            if (value < dct_min) dct_min = value;
+            if (value > dct_max) dct_max = value;
+        }
+        dct.push_back(row_values);
+    }
+
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            int normalized = static_cast<int>(255.0f * (dct[i][j] - dct_min) / (dct_max - dct_min + 1e-5f));
+            normalized = qBound(0, normalized, 255);
+            mod.setPixel(j, i, qRgb(normalized, normalized, normalized));
+        }
+    }
+
+    QPixmap pix = QPixmap::fromImage(mod);
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
+}
+
+
+void MainWindow::on_actionIDCT_triggered()
+{
+    QImage mod(img.size(), QImage::Format_RGB32);
+    const int m = img.height();
+    const int n = img.width();
+
+    qDebug() << "img size: " << n << "x" << m << "\n";
+    qDebug() << "dct size: " << dct.size() << "x" << dct[0].size() << "\n";
+
+
+    for (int i = 0; i < m; ++i) {
+        for (int j = 0; j < n; ++j) {
+            float sum = 0.0f;
+
+            for (int k = 0; k < m; ++k) {
+                float ck = (k == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
+                for (int l = 0; l < n; ++l) {
+                    float cl = (l == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
+
+                    float basis =
+                        qCos((2 * i + 1) * k * M_PI / (2.0f * m)) *
+                        qCos((2 * j + 1) * l * M_PI / (2.0f * n));
+
+                    sum += ck * cl * dct[k][l] * basis;
+                }
+            }
+
+            int gray = qBound(0, static_cast<int>(sum + 0.5f), 255);
+            mod.setPixel(j, i, qRgb(gray, gray, gray));
+        }
+    }
+
+    QPixmap pix = QPixmap::fromImage(mod);
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }

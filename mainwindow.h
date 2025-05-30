@@ -70,6 +70,10 @@ private slots:
 
     void on_actionLimiariza_o_triggered();
 
+    void on_actionDCT_triggered();
+
+    void on_actionIDCT_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

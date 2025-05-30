@@ -204,6 +204,9 @@
     <addaction name="actionCompress_o_de_Escala_Din_mica"/>
     <addaction name="actionBordas_por_Sobel"/>
     <addaction name="actionLimiariza_o"/>
+    <addaction name="separator"/>
+    <addaction name="actionDCT"/>
+    <addaction name="actionIDCT"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -291,6 +294,16 @@
   <action name="actionLimiariza_o">
    <property name="text">
     <string>Limiarização</string>
+   </property>
+  </action>
+  <action name="actionDCT">
+   <property name="text">
+    <string>DCT</string>
+   </property>
+  </action>
+  <action name="actionIDCT">
+   <property name="text">
+    <string>IDCT</string>
    </property>
   </action>
  </widget>
