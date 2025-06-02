@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QtMath>
+#include <QtConcurrent/QtConcurrent>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {

@@ -3,6 +3,82 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 
+struct DCTTask {
+    const QImage& img;
+    int m, n;
+    std::vector<std::vector<float>>& dct;
+    const std::vector<std::vector<float>>& cos_k_i;
+    const std::vector<std::vector<float>>& cos_l_j;
+
+    DCTTask(const QImage& img_,
+            int m_, int n_,
+            std::vector<std::vector<float>>& dct_,
+            const std::vector<std::vector<float>>& cos_k_i_,
+            const std::vector<std::vector<float>>& cos_l_j_)
+        : img(img_), m(m_), n(n_), dct(dct_),
+        cos_k_i(cos_k_i_), cos_l_j(cos_l_j_) {}
+
+    void operator()(int i) const {
+        float ci = (i == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
+
+        for (int j = 0; j < n; ++j) {
+            float cj = (j == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
+            float sum = 0.0f;
+
+            for (int k = 0; k < m; ++k) {
+                float cos_ki = cos_k_i[k][i];
+
+                for (int l = 0; l < n; ++l) {
+                    float gray = qGray(img.pixel(l, k));
+                    float cos_lj = cos_l_j[l][j];
+                    sum += gray * cos_ki * cos_lj;
+                }
+            }
+
+            dct[i][j] = ci * cj * sum;
+        }
+    }
+};
+
+struct IDCTTask {
+    const std::vector<std::vector<float>>& dct;
+    int m, n;
+    QImage* result;
+    const std::vector<std::vector<float>>& cos_i_k;
+    const std::vector<std::vector<float>>& cos_j_l;
+
+    IDCTTask(
+        const std::vector<std::vector<float>>& dct_,
+        QImage* result_,
+        int m_, int n_,
+        const std::vector<std::vector<float>>& cos_i_k_,
+        const std::vector<std::vector<float>>& cos_j_l_)
+        : dct(dct_), result(result_), m(m_), n(n_),
+        cos_i_k(cos_i_k_), cos_j_l(cos_j_l_) {}
+
+    void operator()(int i) const {
+        for (int j = 0; j < n; ++j) {
+            float sum = 0.0f;
+
+            for (int k = 0; k < m; ++k) {
+                float ck = (k == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
+                float cos_ik = cos_i_k[i][k];
+
+                for (int l = 0; l < n; ++l) {
+                    float cl = (l == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
+                    float cos_jl = cos_j_l[j][l];
+                    sum += ck * cl * dct[k][l] * cos_ik * cos_jl;
+                }
+            }
+
+            int gray = qBound(0, static_cast<int>(sum + 0.5f), 255);
+            QRgb* line = reinterpret_cast<QRgb*>(result->scanLine(i));
+            line[j] = qRgb(gray, gray, gray);
+        }
+    }
+};
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -701,51 +777,38 @@ void MainWindow::on_actionLimiariza_o_triggered()
 
 void MainWindow::on_actionDCT_triggered()
 {
-    dct.clear();
-
-    QImage mod(img.size(), QImage::Format_RGB32);
     const int m = img.height();
     const int n = img.width();
 
-    float ci, cj, dct1, sum;
+    dct.clear();
+    dct.resize(m, std::vector<float>(n));
 
-    qDebug() << "img size: " << n << "x" << m << "\n";
+    // Precompute cosine tables
+    std::vector<std::vector<float>> cos_k_i(m, std::vector<float>(m));
+    std::vector<std::vector<float>> cos_l_j(n, std::vector<float>(n));
 
+    for (int k = 0; k < m; ++k)
+        for (int i = 0; i < m; ++i)
+            cos_k_i[k][i] = std::cos((2 * k + 1) * i * M_PI / (2.0f * m));
 
+    for (int l = 0; l < n; ++l)
+        for (int j = 0; j < n; ++j)
+            cos_l_j[l][j] = std::cos((2 * l + 1) * j * M_PI / (2.0f * n));
+
+    DCTTask task(img, m, n, dct, cos_k_i, cos_l_j);
+
+    QVector<int> rows(m);
+    std::iota(rows.begin(), rows.end(), 0);
+
+    QtConcurrent::blockingMap(rows, task);
+
+    // Convert DCT result to grayscale image
+    QImage mod(img.size(), QImage::Format_RGB32);
     for (int i = 0; i < m; ++i) {
-        std::vector<float> row_values;
+        QRgb* line = reinterpret_cast<QRgb*>(mod.scanLine(i));
         for (int j = 0; j < n; ++j) {
-            ci = (i == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
-            cj = (j == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
-
-            sum = 0.0f;
-            for (int k = 0; k < m; ++k) {
-                for (int l = 0; l < n; ++l) {
-                    dct1 = qGray(img.pixel(l, k)) *
-                           qCos((2 * k + 1) * i * M_PI / (2.0f * m)) *
-                           qCos((2 * l + 1) * j * M_PI / (2.0f * n));
-                    sum += dct1;
-                }
-            }
-
-            float value = ci * cj * sum;
-            row_values.push_back(value);
-        }
-        dct.push_back(row_values);
-    }
-
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            int dct_value = static_cast<int>(dct[i][j]);
-            if(dct_value > 255){
-                mod.setPixel(j, i, qRgb(255,255,255));
-            }else{
-                if(dct_value < 0){
-                    mod.setPixel(j, i, qRgb(0, 0, 0));
-                }else{
-                    mod.setPixel(j, i, qRgb(dct_value, dct_value, dct_value));
-                }
-            }
+            int val = std::clamp(static_cast<int>(dct[i][j]), 0, 255);
+            line[j] = qRgb(val, val, val);
         }
     }
 
@@ -753,48 +816,43 @@ void MainWindow::on_actionDCT_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+
     res = mod;
 }
-
 
 void MainWindow::on_actionIDCT_triggered()
 {
-    QImage mod(img.size(), QImage::Format_RGB32);
     const int m = img.height();
     const int n = img.width();
 
-    qDebug() << "img size: " << n << "x" << m << "\n";
-    qDebug() << "dct size: " << dct.size() << "x" << dct[0].size() << "\n";
+    QImage mod(img.size(), QImage::Format_RGB32);
 
+    // Precompute cosine values
+    std::vector<std::vector<float>> cos_i_k(m, std::vector<float>(m));
+    std::vector<std::vector<float>> cos_j_l(n, std::vector<float>(n));
 
-    for (int i = 0; i < m; ++i) {
-        for (int j = 0; j < n; ++j) {
-            float sum = 0.0f;
+    for (int i = 0; i < m; ++i)
+        for (int k = 0; k < m; ++k)
+            cos_i_k[i][k] = std::cos((2 * i + 1) * k * M_PI / (2.0f * m));
 
-            for (int k = 0; k < m; ++k) {
-                float ck = (k == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
-                for (int l = 0; l < n; ++l) {
-                    float cl = (l == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
+    for (int j = 0; j < n; ++j)
+        for (int l = 0; l < n; ++l)
+            cos_j_l[j][l] = std::cos((2 * j + 1) * l * M_PI / (2.0f * n));
 
-                    float basis =
-                        qCos((2 * i + 1) * k * M_PI / (2.0f * m)) *
-                        qCos((2 * j + 1) * l * M_PI / (2.0f * n));
+    // Prepare task and parallel map
+    IDCTTask task(dct, &mod, m, n, cos_i_k, cos_j_l);
+    QVector<int> rows(m);
+    std::iota(rows.begin(), rows.end(), 0);
+    QtConcurrent::blockingMap(rows, task);
 
-                    sum += ck * cl * dct[k][l] * basis;
-                }
-            }
-
-            int gray = qBound(0, static_cast<int>(sum + 0.5f), 255);
-            mod.setPixel(j, i, qRgb(gray, gray, gray));
-        }
-    }
-
+    // Display result
     QPixmap pix = QPixmap::fromImage(mod);
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
     res = mod;
 }
+
 
 void MainWindow::on_actionFiltragem_passa_baixa_DCT_triggered()
 {
