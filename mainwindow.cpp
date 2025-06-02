@@ -103,6 +103,7 @@ std::vector<std::vector<float>> dct_input;
 
 void MainWindow::on_actionEscala_Cinza_triggered()
 {
+    sobelAtivo = false;
     QImage mod = img;
 
     int w = ui->output_image->width();
@@ -126,6 +127,7 @@ void MainWindow::on_actionEscala_Cinza_triggered()
 
 void MainWindow::on_actionCarregar_imagem_triggered()
 {
+    sobelAtivo = false;
     QString filename = QFileDialog::getOpenFileName(this, "Open a file", ".");
     img.load(filename);
 
@@ -137,6 +139,7 @@ void MainWindow::on_actionCarregar_imagem_triggered()
 
 void MainWindow::on_actionEscala_Cinza_Inversa_triggered()
 {
+    sobelAtivo = false;
     QImage mod = img;
 
     int w = ui->output_image->width();
@@ -161,6 +164,7 @@ void MainWindow::on_actionEscala_Cinza_Inversa_triggered()
 
 void MainWindow::on_actionColorida_Inversa_triggered()
 {
+    sobelAtivo = false;
     QImage mod = img;
 
     int w = ui->output_image->width();
@@ -183,6 +187,7 @@ void MainWindow::on_actionColorida_Inversa_triggered()
 
 void MainWindow::on_actionSeparar_canais_de_cores_triggered()
 {
+    sobelAtivo = false;
     QImage red_channel = img;
     QImage green_channel = img;
     QImage blue_channel = img;
@@ -218,6 +223,7 @@ void MainWindow::on_actionSeparar_canais_de_cores_triggered()
 
 void MainWindow::on_actionSal_e_pimenta_triggered()
 {
+    sobelAtivo = false;
     if (img.isNull()) {
         qDebug() << "Erro: Imagem não carregada corretamente!";
         return;
@@ -253,11 +259,10 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
 
 void MainWindow::on_output_to_input_btn_clicked()
 {
-    QPixmap pix = QPixmap::fromImage(res);
-
-    int w = ui->input_image->width();
-    int h = ui->input_image->height();
-    ui->input_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    sobelAtivo = false;
+    QPixmap output_pix = ui->output_image->pixmap();
+    if (!output_pix || output_pix.isNull())
+        return;
 
     img = res;
     if(!dct_output.empty()){
@@ -269,6 +274,7 @@ void MainWindow::on_output_to_input_btn_clicked()
 
 void MainWindow::on_actionFiltro_mediana_triggered()
 {
+    sobelAtivo = false;
     QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
 
     // Garante que o formato da imagem é compatível com setPixel()
@@ -307,6 +313,7 @@ void MainWindow::on_actionFiltro_mediana_triggered()
 
 void MainWindow::on_actionFiltro_m_dia_triggered()
 {
+    sobelAtivo = false;
     QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
 
     // Garante que o formato da imagem é compatível com setPixel()
@@ -344,6 +351,7 @@ void MainWindow::on_actionFiltro_m_dia_triggered()
 
 void MainWindow::on_actionBinarizar_triggered()
 {
+    sobelAtivo = false;
     bool ok=false;
     int threshold = QInputDialog::getInt(this, tr("Digite o limiar"),
                                 tr("Limiar:"), 128, 0, 255, 1, &ok);
@@ -370,6 +378,7 @@ void MainWindow::on_actionBinarizar_triggered()
 
 void MainWindow::on_actionLaplaciano_triggered()
 {
+    sobelAtivo = false;
     QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
 
     // Garante que o formato da imagem é compatível com setPixel()
@@ -403,6 +412,7 @@ void MainWindow::on_actionLaplaciano_triggered()
 
 void MainWindow::on_actionEqualiza_o_triggered()
 {
+    sobelAtivo = false;
     int largura = img.width();
     int altura = img.height();
     int tamanho = largura * altura;
@@ -446,6 +456,7 @@ void MainWindow::on_actionEqualiza_o_triggered()
 
 void MainWindow::on_actionCanal_Vermelho_em_Cinza_triggered()
 {
+    sobelAtivo = false;
     int largura = img.width();
     int altura = img.height();
     QImage red_channel = img;
@@ -482,6 +493,7 @@ void MainWindow::on_actionCanal_Vermelho_em_Cinza_triggered()
 
 void MainWindow::on_actionRGB_para_HSV_triggered()
 {
+    sobelAtivo = false;
     bool ok;
     int R = QInputDialog::getInt(this, "Entrada RGB", "Digite o valor de R (0-255):", 0, 0, 255, 1, &ok);
     if (!ok) return;
@@ -542,6 +554,7 @@ void MainWindow::on_actionRGB_para_HSV_triggered()
 
 void MainWindow::on_actionHSV_para_RGB_triggered()
 {
+    sobelAtivo = false;
     bool ok;
     int H = QInputDialog::getInt(this, "Entrada HSV", "Digite o valor de H (0-360):", 0, 0, 360, 1, &ok);
     if (!ok) return;
@@ -596,6 +609,7 @@ void MainWindow::on_actionHSV_para_RGB_triggered()
 
 void MainWindow::on_actionCompress_o_de_Escala_Din_mica_triggered()
 {
+    sobelAtivo = false;
     bool ok;
     double c = QInputDialog::getDouble(this, "Entrada", "Digite o valor de C (0-1):", 1.0, 0.0, 1.0, 4, &ok);
     if (!ok) return;
@@ -755,6 +769,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 
 void MainWindow::on_actionLimiariza_o_triggered()
 {
+    sobelAtivo = false;
     bool ok=false;
     int threshold = QInputDialog::getInt(this, tr("Digite o limiar"),
                                          tr("Limiar:"), 128, 0, 255, 1, &ok);
