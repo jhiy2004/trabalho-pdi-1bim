@@ -23,8 +23,6 @@ QImage img;
 QImage res;
 
 std::vector<std::vector<float>> dct;
-float dct_min = std::numeric_limits<float>::max();
-float dct_max = std::numeric_limits<float>::lowest();
 
 void MainWindow::on_actionEscala_Cinza_triggered()
 {
@@ -732,18 +730,22 @@ void MainWindow::on_actionDCT_triggered()
 
             float value = ci * cj * sum;
             row_values.push_back(value);
-
-            if (value < dct_min) dct_min = value;
-            if (value > dct_max) dct_max = value;
         }
         dct.push_back(row_values);
     }
 
     for (int i = 0; i < m; ++i) {
         for (int j = 0; j < n; ++j) {
-            int normalized = static_cast<int>(255.0f * (dct[i][j] - dct_min) / (dct_max - dct_min + 1e-5f));
-            normalized = qBound(0, normalized, 255);
-            mod.setPixel(j, i, qRgb(normalized, normalized, normalized));
+            int dct_value = static_cast<int>(dct[i][j]);
+            if(dct_value > 255){
+                mod.setPixel(j, i, qRgb(255,255,255));
+            }else{
+                if(dct_value < 0){
+                    mod.setPixel(j, i, qRgb(0, 0, 0));
+                }else{
+                    mod.setPixel(j, i, qRgb(dct_value, dct_value, dct_value));
+                }
+            }
         }
     }
 
