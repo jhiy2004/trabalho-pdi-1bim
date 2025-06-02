@@ -98,7 +98,8 @@ MainWindow::~MainWindow()
 QImage img;
 QImage res;
 
-std::vector<std::vector<float>> dct;
+std::vector<std::vector<float>> dct_output;
+std::vector<std::vector<float>> dct_input;
 
 void MainWindow::on_actionEscala_Cinza_triggered()
 {
@@ -259,6 +260,9 @@ void MainWindow::on_output_to_input_btn_clicked()
     ui->input_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 
     img = res;
+    if(!dct_output.empty()){
+        dct_input = dct_output;
+    }
 }
 
 
@@ -780,8 +784,8 @@ void MainWindow::on_actionDCT_triggered()
     const int m = img.height();
     const int n = img.width();
 
-    dct.clear();
-    dct.resize(m, std::vector<float>(n));
+    dct_output.clear();
+    dct_output.resize(m, std::vector<float>(n));
 
     // Precompute cosine tables
     std::vector<std::vector<float>> cos_k_i(m, std::vector<float>(m));
@@ -795,7 +799,7 @@ void MainWindow::on_actionDCT_triggered()
         for (int j = 0; j < n; ++j)
             cos_l_j[l][j] = std::cos((2 * l + 1) * j * M_PI / (2.0f * n));
 
-    DCTTask task(img, m, n, dct, cos_k_i, cos_l_j);
+    DCTTask task(img, m, n, dct_output, cos_k_i, cos_l_j);
 
     QVector<int> rows(m);
     std::iota(rows.begin(), rows.end(), 0);
@@ -807,7 +811,7 @@ void MainWindow::on_actionDCT_triggered()
     for (int i = 0; i < m; ++i) {
         QRgb* line = reinterpret_cast<QRgb*>(mod.scanLine(i));
         for (int j = 0; j < n; ++j) {
-            int val = std::clamp(static_cast<int>(dct[i][j]), 0, 255);
+            int val = std::clamp(static_cast<int>(dct_output[i][j]), 0, 255);
             line[j] = qRgb(val, val, val);
         }
     }
@@ -840,7 +844,7 @@ void MainWindow::on_actionIDCT_triggered()
             cos_j_l[j][l] = std::cos((2 * j + 1) * l * M_PI / (2.0f * n));
 
     // Prepare task and parallel map
-    IDCTTask task(dct, &mod, m, n, cos_i_k, cos_j_l);
+    IDCTTask task(dct_input, &mod, m, n, cos_i_k, cos_j_l);
     QVector<int> rows(m);
     std::iota(rows.begin(), rows.end(), 0);
     QtConcurrent::blockingMap(rows, task);
@@ -858,17 +862,18 @@ void MainWindow::on_actionFiltragem_passa_baixa_DCT_triggered()
 {
     bool ok=false;
     int cut = QInputDialog::getInt(this, tr("Digite o raio do corte"),
-                                   tr("Limiar:"), 77, 0, dct.size(), 1, &ok);
+                                   tr("Limiar:"), 77, 0, dct_input.size(), 1, &ok);
     if(ok){
         QImage mod = img;
+        dct_output = dct_input;
 
-        int m = dct.size();
-        int n = dct[0].size();
+        int m = dct_input.size();
+        int n = dct_input[0].size();
 
         for(int i=0; i < m; ++i){
             for(int j=0; j < n; ++j){
                 if(i*i + j*j > cut*cut){
-                    dct[i][j] = 0;
+                    dct_output[i][j] = 0;
                     mod.setPixel(j, i, qRgb(0, 0, 0));
                 }
             }
@@ -886,17 +891,18 @@ void MainWindow::on_actionFiltragem_passa_alta_DCT_triggered()
 {
     bool ok=false;
     int cut = QInputDialog::getInt(this, tr("Digite o raio do corte"),
-                                   tr("Limiar:"), 77, 0, dct.size(), 1, &ok);
+                                   tr("Limiar:"), 77, 0, dct_input.size(), 1, &ok);
     if(ok){
         QImage mod = img;
+        dct_output = dct_input;
 
-        int m = dct.size();
-        int n = dct[0].size();
+        int m = dct_input.size();
+        int n = dct_input[0].size();
 
         for(int i=0; i < m; ++i){
             for(int j=0; j < n; ++j){
                 if(i*i + j*j < cut*cut){
-                    dct[i][j] = 0;
+                    dct_output[i][j] = 0;
                     mod.setPixel(j, i, qRgb(0, 0, 0));
                 }
             }
