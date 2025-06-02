@@ -10,6 +10,7 @@
 #include <QInputDialog>
 #include <QtMath>
 #include <QtConcurrent/QtConcurrent>
+#include "clickablelabel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -78,6 +79,8 @@ private slots:
     void on_actionFiltragem_passa_baixa_DCT_triggered();
 
     void on_actionFiltragem_passa_alta_DCT_triggered();
+
+    void on_actionInserir_ru_do_sal_clicando_triggered();
 
 private:
     Ui::MainWindow *ui;

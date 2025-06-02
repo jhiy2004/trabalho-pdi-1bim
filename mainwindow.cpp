@@ -915,3 +915,55 @@ void MainWindow::on_actionFiltragem_passa_alta_DCT_triggered()
     }
 }
 
+void MainWindow::on_actionInserir_ru_do_sal_clicando_triggered()
+{
+    auto mod = std::make_shared<QImage>(img); // shared copy of image
+    auto dct_temp = std::make_shared<std::vector<std::vector<float>>>(dct_input); // shared DCT
+
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("Inserir sal");
+
+    QSize displaySize(500, 500);
+
+    ClickableLabel* label = new ClickableLabel(dialog);
+    label->setFixedSize(displaySize);
+    label->setAlignment(Qt::AlignCenter);
+    label->setPixmap(QPixmap::fromImage(*mod).scaled(displaySize, Qt::KeepAspectRatio));
+    label->setScaledContents(true);
+
+    QPushButton* confirmButton = new QPushButton("Confirmar", dialog);
+
+    QVBoxLayout* layout = new QVBoxLayout(dialog);
+    layout->addWidget(label);
+    layout->addWidget(confirmButton);
+    dialog->setLayout(layout);
+
+    connect(label, &ClickableLabel::clicked, this,
+            [mod, label, displaySize, dct_temp](const QPoint& pos) mutable {
+                QSize labelSize = label->size();
+                QSize imgSize = mod->size();
+
+                int x = pos.x() * imgSize.width() / labelSize.width();
+                int y = pos.y() * imgSize.height() / labelSize.height();
+
+                if (x >= 0 && x < imgSize.width() && y >= 0 && y < imgSize.height()) {
+                    mod->setPixelColor(x, y, Qt::white);
+                    if (!dct_temp->empty())
+                        (*dct_temp)[y][x] = 255.0f;
+
+                    QPixmap updatedPixmap = QPixmap::fromImage(*mod);
+                    label->setPixmap(updatedPixmap.scaled(displaySize, Qt::KeepAspectRatio));
+                }
+            });
+
+    connect(confirmButton, &QPushButton::clicked, this,
+            [this, mod, dct_temp, dialog]() {
+                res = *mod;
+                QPixmap pix = QPixmap::fromImage(res);
+                ui->output_image->setPixmap(pix.scaled(ui->output_image->size(), Qt::KeepAspectRatio));
+                dct_output = *dct_temp;
+                dialog->accept();
+            });
+
+    dialog->exec();
+}

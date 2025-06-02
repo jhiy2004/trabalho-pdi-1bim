@@ -174,7 +174,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenu">
@@ -209,6 +209,7 @@
     <addaction name="actionIDCT"/>
     <addaction name="actionFiltragem_passa_baixa_DCT"/>
     <addaction name="actionFiltragem_passa_alta_DCT"/>
+    <addaction name="actionInserir_ru_do_sal_clicando"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -316,6 +317,11 @@
   <action name="actionFiltragem_passa_alta_DCT">
    <property name="text">
     <string>Filtragem passa-alta(DCT)</string>
+   </property>
+  </action>
+  <action name="actionInserir_ru_do_sal_clicando">
+   <property name="text">
+    <string>Inserir ruído sal(clicando)</string>
    </property>
   </action>
  </widget>

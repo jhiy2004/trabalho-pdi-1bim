@@ -23,6 +23,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(projeto-qt
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
+        clickablelabel.h
 
 
     )
