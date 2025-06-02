@@ -795,3 +795,59 @@ void MainWindow::on_actionIDCT_triggered()
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
     res = mod;
 }
+
+void MainWindow::on_actionFiltragem_passa_baixa_DCT_triggered()
+{
+    bool ok=false;
+    int cut = QInputDialog::getInt(this, tr("Digite o raio do corte"),
+                                   tr("Limiar:"), 77, 0, dct.size(), 1, &ok);
+    if(ok){
+        QImage mod = img;
+
+        int m = dct.size();
+        int n = dct[0].size();
+
+        for(int i=0; i < m; ++i){
+            for(int j=0; j < n; ++j){
+                if(i*i + j*j > cut*cut){
+                    dct[i][j] = 0;
+                    mod.setPixel(j, i, qRgb(0, 0, 0));
+                }
+            }
+        }
+        QPixmap pix = QPixmap::fromImage(mod);
+        int w = ui->output_image->width();
+        int h = ui->output_image->height();
+        ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
+    }
+}
+
+
+void MainWindow::on_actionFiltragem_passa_alta_DCT_triggered()
+{
+    bool ok=false;
+    int cut = QInputDialog::getInt(this, tr("Digite o raio do corte"),
+                                   tr("Limiar:"), 77, 0, dct.size(), 1, &ok);
+    if(ok){
+        QImage mod = img;
+
+        int m = dct.size();
+        int n = dct[0].size();
+
+        for(int i=0; i < m; ++i){
+            for(int j=0; j < n; ++j){
+                if(i*i + j*j < cut*cut){
+                    dct[i][j] = 0;
+                    mod.setPixel(j, i, qRgb(0, 0, 0));
+                }
+            }
+        }
+        QPixmap pix = QPixmap::fromImage(mod);
+        int w = ui->output_image->width();
+        int h = ui->output_image->height();
+        ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
+    }
+}
+

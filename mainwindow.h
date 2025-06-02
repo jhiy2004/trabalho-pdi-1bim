@@ -74,6 +74,10 @@ private slots:
 
     void on_actionIDCT_triggered();
 
+    void on_actionFiltragem_passa_baixa_DCT_triggered();
+
+    void on_actionFiltragem_passa_alta_DCT_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

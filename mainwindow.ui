@@ -207,6 +207,8 @@
     <addaction name="separator"/>
     <addaction name="actionDCT"/>
     <addaction name="actionIDCT"/>
+    <addaction name="actionFiltragem_passa_baixa_DCT"/>
+    <addaction name="actionFiltragem_passa_alta_DCT"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -304,6 +306,16 @@
   <action name="actionIDCT">
    <property name="text">
     <string>IDCT</string>
+   </property>
+  </action>
+  <action name="actionFiltragem_passa_baixa_DCT">
+   <property name="text">
+    <string>Filtragem passa-baixa(DCT)</string>
+   </property>
+  </action>
+  <action name="actionFiltragem_passa_alta_DCT">
+   <property name="text">
+    <string>Filtragem passa-alta(DCT)</string>
    </property>
   </action>
  </widget>
