@@ -982,3 +982,126 @@ void MainWindow::on_actionInserir_ru_do_sal_clicando_triggered()
 
     dialog->exec();
 }
+
+void MainWindow::on_actionFiltro_do_m_nimo_triggered()
+{
+    sobelAtivo = false;
+    QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int matrix[9];
+            matrix[0] = qRed(img.pixel(j-1, i-1));
+            matrix[1] = qRed(img.pixel(j-1, i));
+            matrix[2] = qRed(img.pixel(j-1, i+1));
+            matrix[3] = qRed(img.pixel(j, i-1));
+            matrix[4] = qRed(img.pixel(j, i));
+            matrix[5] = qRed(img.pixel(j, i+1));
+            matrix[6] = qRed(img.pixel(j+1, i-1));
+            matrix[7] = qRed(img.pixel(j+1, i));
+            matrix[8] = qRed(img.pixel(j+1, i+1));
+
+            std::sort(matrix, matrix + 9);
+
+            int min = matrix[0];
+
+            QRgb color = qRgb(min, min, min);
+            mod.setPixel(j-1, i-1, color);
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
+}
+
+
+void MainWindow::on_actionFiltro_do_m_ximo_triggered()
+{
+    sobelAtivo = false;
+    QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int matrix[9];
+            matrix[0] = qRed(img.pixel(j-1, i-1));
+            matrix[1] = qRed(img.pixel(j-1, i));
+            matrix[2] = qRed(img.pixel(j-1, i+1));
+            matrix[3] = qRed(img.pixel(j, i-1));
+            matrix[4] = qRed(img.pixel(j, i));
+            matrix[5] = qRed(img.pixel(j, i+1));
+            matrix[6] = qRed(img.pixel(j+1, i-1));
+            matrix[7] = qRed(img.pixel(j+1, i));
+            matrix[8] = qRed(img.pixel(j+1, i+1));
+
+            std::sort(matrix, matrix + 9);
+
+            int max = matrix[8];
+
+            QRgb color = qRgb(max, max, max);
+            mod.setPixel(j-1, i-1, color);
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
+}
+
+
+void MainWindow::on_actionFiltro_do_ponto_m_dio_triggered()
+{
+    sobelAtivo = false;
+    QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+    // Garante que o formato da imagem é compatível com setPixel()
+    if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+        mod = mod.convertToFormat(QImage::Format_RGB32);
+    }
+
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int matrix[9];
+            matrix[0] = qRed(img.pixel(j-1, i-1));
+            matrix[1] = qRed(img.pixel(j-1, i));
+            matrix[2] = qRed(img.pixel(j-1, i+1));
+            matrix[3] = qRed(img.pixel(j, i-1));
+            matrix[4] = qRed(img.pixel(j, i));
+            matrix[5] = qRed(img.pixel(j, i+1));
+            matrix[6] = qRed(img.pixel(j+1, i-1));
+            matrix[7] = qRed(img.pixel(j+1, i));
+            matrix[8] = qRed(img.pixel(j+1, i+1));
+
+            std::sort(matrix, matrix + 9);
+
+            int min = matrix[0];
+            int max = matrix[8];
+
+            int med = (min + max) / 2;
+
+            QRgb color = qRgb(med, med, med);
+            mod.setPixel(j-1, i-1, color);
+        }
+    }
+    QPixmap pix = QPixmap::fromImage(mod);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
+}
+
