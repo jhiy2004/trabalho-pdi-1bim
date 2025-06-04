@@ -213,6 +213,7 @@
     <addaction name="actionFiltro_do_m_nimo"/>
     <addaction name="actionFiltro_do_m_ximo"/>
     <addaction name="actionFiltro_do_ponto_m_dio"/>
+    <addaction name="actionPseudo_Cores"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -340,6 +341,11 @@
   <action name="actionFiltro_do_ponto_m_dio">
    <property name="text">
     <string>Filtro do ponto médio</string>
+   </property>
+  </action>
+  <action name="actionPseudo_Cores">
+   <property name="text">
+    <string>Pseudo Cores</string>
    </property>
   </action>
  </widget>
