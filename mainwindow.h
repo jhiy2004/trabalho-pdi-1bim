@@ -82,6 +82,12 @@ private slots:
 
     void on_actionInserir_ru_do_sal_clicando_triggered();
 
+    void on_actionFiltro_do_m_nimo_triggered();
+
+    void on_actionFiltro_do_m_ximo_triggered();
+
+    void on_actionFiltro_do_ponto_m_dio_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

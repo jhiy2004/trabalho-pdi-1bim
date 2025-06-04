@@ -210,6 +210,9 @@
     <addaction name="actionFiltragem_passa_baixa_DCT"/>
     <addaction name="actionFiltragem_passa_alta_DCT"/>
     <addaction name="actionInserir_ru_do_sal_clicando"/>
+    <addaction name="actionFiltro_do_m_nimo"/>
+    <addaction name="actionFiltro_do_m_ximo"/>
+    <addaction name="actionFiltro_do_ponto_m_dio"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -322,6 +325,21 @@
   <action name="actionInserir_ru_do_sal_clicando">
    <property name="text">
     <string>Inserir ruído sal(clicando)</string>
+   </property>
+  </action>
+  <action name="actionFiltro_do_m_nimo">
+   <property name="text">
+    <string>Filtro do mínimo</string>
+   </property>
+  </action>
+  <action name="actionFiltro_do_m_ximo">
+   <property name="text">
+    <string>Filtro do máximo</string>
+   </property>
+  </action>
+  <action name="actionFiltro_do_ponto_m_dio">
+   <property name="text">
+    <string>Filtro do ponto médio</string>
    </property>
   </action>
  </widget>
