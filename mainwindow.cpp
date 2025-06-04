@@ -3,6 +3,82 @@
 #include <QMessageBox>
 #include <QMouseEvent>
 
+struct DCTTask {
+    const QImage& img;
+    int m, n;
+    std::vector<std::vector<float>>& dct;
+    const std::vector<std::vector<float>>& cos_k_i;
+    const std::vector<std::vector<float>>& cos_l_j;
+
+    DCTTask(const QImage& img_,
+            int m_, int n_,
+            std::vector<std::vector<float>>& dct_,
+            const std::vector<std::vector<float>>& cos_k_i_,
+            const std::vector<std::vector<float>>& cos_l_j_)
+        : img(img_), m(m_), n(n_), dct(dct_),
+        cos_k_i(cos_k_i_), cos_l_j(cos_l_j_) {}
+
+    void operator()(int i) const {
+        float ci = (i == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
+
+        for (int j = 0; j < n; ++j) {
+            float cj = (j == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
+            float sum = 0.0f;
+
+            for (int k = 0; k < m; ++k) {
+                float cos_ki = cos_k_i[k][i];
+
+                for (int l = 0; l < n; ++l) {
+                    float gray = qGray(img.pixel(l, k));
+                    float cos_lj = cos_l_j[l][j];
+                    sum += gray * cos_ki * cos_lj;
+                }
+            }
+
+            dct[i][j] = ci * cj * sum;
+        }
+    }
+};
+
+struct IDCTTask {
+    const std::vector<std::vector<float>>& dct;
+    int m, n;
+    QImage* result;
+    const std::vector<std::vector<float>>& cos_i_k;
+    const std::vector<std::vector<float>>& cos_j_l;
+
+    IDCTTask(
+        const std::vector<std::vector<float>>& dct_,
+        QImage* result_,
+        int m_, int n_,
+        const std::vector<std::vector<float>>& cos_i_k_,
+        const std::vector<std::vector<float>>& cos_j_l_)
+        : dct(dct_), result(result_), m(m_), n(n_),
+        cos_i_k(cos_i_k_), cos_j_l(cos_j_l_) {}
+
+    void operator()(int i) const {
+        for (int j = 0; j < n; ++j) {
+            float sum = 0.0f;
+
+            for (int k = 0; k < m; ++k) {
+                float ck = (k == 0) ? 1.0f / sqrt(m) : sqrt(2.0f / m);
+                float cos_ik = cos_i_k[i][k];
+
+                for (int l = 0; l < n; ++l) {
+                    float cl = (l == 0) ? 1.0f / sqrt(n) : sqrt(2.0f / n);
+                    float cos_jl = cos_j_l[j][l];
+                    sum += ck * cl * dct[k][l] * cos_ik * cos_jl;
+                }
+            }
+
+            int gray = qBound(0, static_cast<int>(sum + 0.5f), 255);
+            QRgb* line = reinterpret_cast<QRgb*>(result->scanLine(i));
+            line[j] = qRgb(gray, gray, gray);
+        }
+    }
+};
+
+
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -20,6 +96,10 @@ MainWindow::~MainWindow()
 }
 
 QImage img;
+QImage res;
+
+std::vector<std::vector<float>> dct_output;
+std::vector<std::vector<float>> dct_input;
 
 void MainWindow::on_actionEscala_Cinza_triggered()
 {
@@ -42,6 +122,7 @@ void MainWindow::on_actionEscala_Cinza_triggered()
     QPixmap pix = QPixmap::fromImage(mod);
 
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 void MainWindow::on_actionCarregar_imagem_triggered()
@@ -77,6 +158,7 @@ void MainWindow::on_actionEscala_Cinza_Inversa_triggered()
     QPixmap pix = QPixmap::fromImage(mod);
 
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -99,6 +181,7 @@ void MainWindow::on_actionColorida_Inversa_triggered()
     QPixmap pix = QPixmap::fromImage(mod);
 
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -171,6 +254,7 @@ void MainWindow::on_actionSal_e_pimenta_triggered()
 
     QPixmap pix = QPixmap::fromImage(mod);
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 void MainWindow::on_output_to_input_btn_clicked()
@@ -180,9 +264,10 @@ void MainWindow::on_output_to_input_btn_clicked()
     if (!output_pix || output_pix.isNull())
         return;
 
-    img = output_pix.toImage();
-    QPixmap scaledPix = output_pix.scaled(output_pix.size(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
-    ui->input_image->setPixmap(scaledPix);
+    img = res;
+    if(!dct_output.empty()){
+        dct_input = dct_output;
+    }
 }
 
 
@@ -223,6 +308,7 @@ void MainWindow::on_actionFiltro_mediana_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 void MainWindow::on_actionFiltro_m_dia_triggered()
@@ -259,6 +345,7 @@ void MainWindow::on_actionFiltro_m_dia_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -285,6 +372,7 @@ void MainWindow::on_actionBinarizar_triggered()
         int w = ui->output_image->width();
         int h = ui->output_image->height();
         ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
     }
 }
 
@@ -318,6 +406,7 @@ void MainWindow::on_actionLaplaciano_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
 }
 
 
@@ -361,6 +450,7 @@ void MainWindow::on_actionEqualiza_o_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = imagemEqualizada;
 }
 
 
@@ -545,6 +635,7 @@ void MainWindow::on_actionCompress_o_de_Escala_Din_mica_triggered()
     int w = ui->output_image->width();
     int h = ui->output_image->height();
     ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = image;
 }
 
 
@@ -618,6 +709,7 @@ void MainWindow::on_actionBordas_por_Sobel_triggered()
 
     QPixmap pix = QPixmap::fromImage(mod);
     ui->output_image->setPixmap(pix.scaled(ui->output_image->width(), ui->output_image->height(), Qt::KeepAspectRatio));
+    res = mod;
 }
 
 bool MainWindow::eventFilter(QObject *obj, QEvent *event)
@@ -698,5 +790,195 @@ void MainWindow::on_actionLimiariza_o_triggered()
         int w = ui->output_image->width();
         int h = ui->output_image->height();
         ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
     }
+}
+
+void MainWindow::on_actionDCT_triggered()
+{
+    const int m = img.height();
+    const int n = img.width();
+
+    dct_output.clear();
+    dct_output.resize(m, std::vector<float>(n));
+
+    // Precompute cosine tables
+    std::vector<std::vector<float>> cos_k_i(m, std::vector<float>(m));
+    std::vector<std::vector<float>> cos_l_j(n, std::vector<float>(n));
+
+    for (int k = 0; k < m; ++k)
+        for (int i = 0; i < m; ++i)
+            cos_k_i[k][i] = std::cos((2 * k + 1) * i * M_PI / (2.0f * m));
+
+    for (int l = 0; l < n; ++l)
+        for (int j = 0; j < n; ++j)
+            cos_l_j[l][j] = std::cos((2 * l + 1) * j * M_PI / (2.0f * n));
+
+    DCTTask task(img, m, n, dct_output, cos_k_i, cos_l_j);
+
+    QVector<int> rows(m);
+    std::iota(rows.begin(), rows.end(), 0);
+
+    QtConcurrent::blockingMap(rows, task);
+
+    // Convert DCT result to grayscale image
+    QImage mod(img.size(), QImage::Format_RGB32);
+    for (int i = 0; i < m; ++i) {
+        QRgb* line = reinterpret_cast<QRgb*>(mod.scanLine(i));
+        for (int j = 0; j < n; ++j) {
+            int val = std::clamp(static_cast<int>(dct_output[i][j]), 0, 255);
+            line[j] = qRgb(val, val, val);
+        }
+    }
+
+    QPixmap pix = QPixmap::fromImage(mod);
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+
+    res = mod;
+}
+
+void MainWindow::on_actionIDCT_triggered()
+{
+    const int m = img.height();
+    const int n = img.width();
+
+    QImage mod(img.size(), QImage::Format_RGB32);
+
+    // Precompute cosine values
+    std::vector<std::vector<float>> cos_i_k(m, std::vector<float>(m));
+    std::vector<std::vector<float>> cos_j_l(n, std::vector<float>(n));
+
+    for (int i = 0; i < m; ++i)
+        for (int k = 0; k < m; ++k)
+            cos_i_k[i][k] = std::cos((2 * i + 1) * k * M_PI / (2.0f * m));
+
+    for (int j = 0; j < n; ++j)
+        for (int l = 0; l < n; ++l)
+            cos_j_l[j][l] = std::cos((2 * j + 1) * l * M_PI / (2.0f * n));
+
+    // Prepare task and parallel map
+    IDCTTask task(dct_input, &mod, m, n, cos_i_k, cos_j_l);
+    QVector<int> rows(m);
+    std::iota(rows.begin(), rows.end(), 0);
+    QtConcurrent::blockingMap(rows, task);
+
+    // Display result
+    QPixmap pix = QPixmap::fromImage(mod);
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
+}
+
+
+void MainWindow::on_actionFiltragem_passa_baixa_DCT_triggered()
+{
+    bool ok=false;
+    int cut = QInputDialog::getInt(this, tr("Digite o raio do corte"),
+                                   tr("Limiar:"), 77, 0, dct_input.size(), 1, &ok);
+    if(ok){
+        QImage mod = img;
+        dct_output = dct_input;
+
+        int m = dct_input.size();
+        int n = dct_input[0].size();
+
+        for(int i=0; i < m; ++i){
+            for(int j=0; j < n; ++j){
+                if(i*i + j*j > cut*cut){
+                    dct_output[i][j] = 0;
+                    mod.setPixel(j, i, qRgb(0, 0, 0));
+                }
+            }
+        }
+        QPixmap pix = QPixmap::fromImage(mod);
+        int w = ui->output_image->width();
+        int h = ui->output_image->height();
+        ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
+    }
+}
+
+
+void MainWindow::on_actionFiltragem_passa_alta_DCT_triggered()
+{
+    bool ok=false;
+    int cut = QInputDialog::getInt(this, tr("Digite o raio do corte"),
+                                   tr("Limiar:"), 77, 0, dct_input.size(), 1, &ok);
+    if(ok){
+        QImage mod = img;
+        dct_output = dct_input;
+
+        int m = dct_input.size();
+        int n = dct_input[0].size();
+
+        for(int i=0; i < m; ++i){
+            for(int j=0; j < n; ++j){
+                if(i*i + j*j < cut*cut){
+                    dct_output[i][j] = 0;
+                    mod.setPixel(j, i, qRgb(0, 0, 0));
+                }
+            }
+        }
+        QPixmap pix = QPixmap::fromImage(mod);
+        int w = ui->output_image->width();
+        int h = ui->output_image->height();
+        ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
+    }
+}
+
+void MainWindow::on_actionInserir_ru_do_sal_clicando_triggered()
+{
+    auto mod = std::make_shared<QImage>(img); // shared copy of image
+    auto dct_temp = std::make_shared<std::vector<std::vector<float>>>(dct_input); // shared DCT
+
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("Inserir sal");
+
+    QSize displaySize(500, 500);
+
+    ClickableLabel* label = new ClickableLabel(dialog);
+    label->setFixedSize(displaySize);
+    label->setAlignment(Qt::AlignCenter);
+    label->setPixmap(QPixmap::fromImage(*mod).scaled(displaySize, Qt::KeepAspectRatio));
+    label->setScaledContents(true);
+
+    QPushButton* confirmButton = new QPushButton("Confirmar", dialog);
+
+    QVBoxLayout* layout = new QVBoxLayout(dialog);
+    layout->addWidget(label);
+    layout->addWidget(confirmButton);
+    dialog->setLayout(layout);
+
+    connect(label, &ClickableLabel::clicked, this,
+            [mod, label, displaySize, dct_temp](const QPoint& pos) mutable {
+                QSize labelSize = label->size();
+                QSize imgSize = mod->size();
+
+                int x = pos.x() * imgSize.width() / labelSize.width();
+                int y = pos.y() * imgSize.height() / labelSize.height();
+
+                if (x >= 0 && x < imgSize.width() && y >= 0 && y < imgSize.height()) {
+                    mod->setPixelColor(x, y, Qt::white);
+                    if (!dct_temp->empty())
+                        (*dct_temp)[y][x] = 255.0f;
+
+                    QPixmap updatedPixmap = QPixmap::fromImage(*mod);
+                    label->setPixmap(updatedPixmap.scaled(displaySize, Qt::KeepAspectRatio));
+                }
+            });
+
+    connect(confirmButton, &QPushButton::clicked, this,
+            [this, mod, dct_temp, dialog]() {
+                res = *mod;
+                QPixmap pix = QPixmap::fromImage(res);
+                ui->output_image->setPixmap(pix.scaled(ui->output_image->size(), Qt::KeepAspectRatio));
+                dct_output = *dct_temp;
+                dialog->accept();
+            });
+
+    dialog->exec();
 }

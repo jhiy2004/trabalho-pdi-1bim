@@ -9,6 +9,8 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QtMath>
+#include <QtConcurrent/QtConcurrent>
+#include "clickablelabel.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -69,6 +71,16 @@ private slots:
     void on_actionBordas_por_Sobel_triggered();
 
     void on_actionLimiariza_o_triggered();
+
+    void on_actionDCT_triggered();
+
+    void on_actionIDCT_triggered();
+
+    void on_actionFiltragem_passa_baixa_DCT_triggered();
+
+    void on_actionFiltragem_passa_alta_DCT_triggered();
+
+    void on_actionInserir_ru_do_sal_clicando_triggered();
 
 private:
     Ui::MainWindow *ui;
