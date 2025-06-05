@@ -214,6 +214,7 @@
     <addaction name="actionFiltro_do_m_ximo"/>
     <addaction name="actionFiltro_do_ponto_m_dio"/>
     <addaction name="actionPseudo_Cores"/>
+    <addaction name="actionEqualizar_HSL"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -346,6 +347,11 @@
   <action name="actionPseudo_Cores">
    <property name="text">
     <string>Pseudo Cores</string>
+   </property>
+  </action>
+  <action name="actionEqualizar_HSL">
+   <property name="text">
+    <string>Equalizar HSL</string>
    </property>
   </action>
  </widget>
