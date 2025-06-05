@@ -1160,3 +1160,61 @@ void MainWindow::on_actionPseudo_Cores_triggered()
     res = mod;
 }
 
+
+void MainWindow::on_actionEqualizar_HSL_triggered()
+{
+    sobelAtivo = false;
+
+    int largura = img.width();
+    int altura = img.height();
+    int tamanho = largura * altura;
+
+    QVector<int> histograma(256, 0);
+    QVector<QVector3D> hslPixels;
+
+    // Converte para HSL e preenche o histograma de L
+    for (int y = 0; y < altura; ++y) {
+        for (int x = 0; x < largura; ++x) {
+            QColor cor(img.pixel(x, y));
+            float h, s, l;
+            cor.getHslF(&h, &s, &l);
+            int l_int = static_cast<int>(l * 255.0);
+            histograma[l_int]++;
+            hslPixels.append(QVector3D(h, s, l));
+        }
+    }
+
+    // CDF
+    QVector<int> cdf(256, 0);
+    cdf[0] = histograma[0];
+    for (int i = 1; i < 256; ++i)
+        cdf[i] = cdf[i - 1] + histograma[i];
+
+    QVector<int> novaL(256, 0);
+    for (int i = 0; i < 256; ++i) {
+        novaL[i] = qRound(((cdf[i] - cdf[0]) / double(tamanho - cdf[0])) * 255);
+    }
+
+    // Cria a nova imagem
+    QImage imagemEqualizada(largura, altura, QImage::Format_RGB32);
+    int idx = 0;
+    for (int y = 0; y < altura; ++y) {
+        for (int x = 0; x < largura; ++x) {
+            QVector3D hsl = hslPixels[idx++];
+            int l_int = static_cast<int>(hsl.z() * 255.0);
+            float l_eq = novaL[l_int] / 255.0f;
+
+            QColor novaCor;
+            novaCor.setHslF(hsl.x(), hsl.y(), l_eq);
+            imagemEqualizada.setPixel(x, y, novaCor.rgb());
+        }
+    }
+
+    // Exibe na interface
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    QPixmap pix = QPixmap::fromImage(imagemEqualizada);
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = imagemEqualizada;
+}
+

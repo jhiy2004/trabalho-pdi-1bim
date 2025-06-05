@@ -90,6 +90,8 @@ private slots:
 
     void on_actionPseudo_Cores_triggered();
 
+    void on_actionEqualizar_HSL_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
