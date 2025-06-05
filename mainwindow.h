@@ -88,6 +88,8 @@ private slots:
 
     void on_actionFiltro_do_ponto_m_dio_triggered();
 
+    void on_actionPseudo_Cores_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

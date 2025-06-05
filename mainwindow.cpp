@@ -1105,3 +1105,58 @@ void MainWindow::on_actionFiltro_do_ponto_m_dio_triggered()
     res = mod;
 }
 
+QRgb grayToPseudoColor(int gray) {
+    int r = 0, g = 0, b = 0;
+
+    if (gray < 64) {
+        // Preto -> Azul
+        float t = gray / 64.0f;
+        r = 0;
+        g = 0;
+        b = static_cast<int>(255 * t);
+    } else if (gray < 128) {
+        // Azul -> Ciano
+        float t = (gray - 64) / 64.0f;
+        r = 0;
+        g = static_cast<int>(255 * t);
+        b = 255;
+    } else if (gray < 192) {
+        // Ciano -> Verde
+        float t = (gray - 128) / 64.0f;
+        r = 0;
+        g = 255;
+        b = static_cast<int>(255 * (1 - t));
+    } else {
+        // Verde -> Amarelo
+        float t = (gray - 192) / 63.0f;
+        r = static_cast<int>(255 * t);
+        g = 255;
+        b = 0;
+    }
+
+    return qRgb(r, g, b);
+}
+
+
+void MainWindow::on_actionPseudo_Cores_triggered()
+{
+    sobelAtivo = false;
+    QImage mod = img;
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+
+    for(int i = 0; i < mod.height(); ++i){
+        for(int j = 0; j < mod.width(); ++j){
+            QRgb color = mod.pixel(j, i);
+            int gray = qGray(color);
+            QRgb pseudo = grayToPseudoColor(gray);
+            mod.setPixel(j, i, pseudo);
+        }
+    }
+
+    QPixmap pix = QPixmap::fromImage(mod);
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = mod;
+}
+
