@@ -92,6 +92,12 @@ private slots:
 
     void on_actionEqualizar_HSL_triggered();
 
+    int otsuThreshold(const QImage &grayImg);
+
+    void on_actionBinariza_o_OTSU_triggered();
+
+    void on_actionLimiariza_o_OTSU_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

@@ -1218,3 +1218,162 @@ void MainWindow::on_actionEqualizar_HSL_triggered()
     res = imagemEqualizada;
 }
 
+int otsuThreshold(const QImage &grayImg) {
+    int hist[256] = {0};
+    int total = grayImg.width() * grayImg.height();
+
+    // Construir histograma
+    for (int y = 0; y < grayImg.height(); ++y) {
+        const uchar* line = grayImg.scanLine(y);
+        for (int x = 0; x < grayImg.width(); ++x) {
+            int val = line[x];
+            hist[val]++;
+        }
+    }
+
+    // Probabilidades e média global
+    float sum = 0;
+    for (int t = 0; t < 256; ++t)
+        sum += t * hist[t];
+
+    float sumB = 0;
+    int wB = 0, wF = 0;
+    float varMax = 0;
+    int threshold = 0;
+
+    for (int t = 0; t < 256; ++t) {
+        wB += hist[t];
+        if (wB == 0) continue;
+
+        wF = total - wB;
+        if (wF == 0) break;
+
+        sumB += static_cast<float>(t * hist[t]);
+
+        float mB = sumB / wB;
+        float mF = (sum - sumB) / wF;
+
+        float varBetween = static_cast<float>(wB) * static_cast<float>(wF) * (mB - mF) * (mB - mF);
+
+        if (varBetween > varMax) {
+            varMax = varBetween;
+            threshold = t;
+        }
+    }
+
+    return threshold;
+}
+
+int MainWindow::otsuThreshold(const QImage &grayImg) {
+    int hist[256] = {0};
+    int total = grayImg.width() * grayImg.height();
+
+    // Construir histograma
+    for (int y = 0; y < grayImg.height(); ++y) {
+        const uchar* line = grayImg.scanLine(y);
+        for (int x = 0; x < grayImg.width(); ++x) {
+            int val = line[x];
+            hist[val]++;
+        }
+    }
+
+    // Probabilidades e média global
+    float sum = 0;
+    for (int t = 0; t < 256; ++t)
+        sum += t * hist[t];
+
+    float sumB = 0;
+    int wB = 0, wF = 0;
+    float varMax = 0;
+    int threshold = 0;
+
+    for (int t = 0; t < 256; ++t) {
+        wB += hist[t];
+        if (wB == 0) continue;
+
+        wF = total - wB;
+        if (wF == 0) break;
+
+        sumB += static_cast<float>(t * hist[t]);
+
+        float mB = sumB / wB;
+        float mF = (sum - sumB) / wF;
+
+        float varBetween = static_cast<float>(wB) * static_cast<float>(wF) * (mB - mF) * (mB - mF);
+
+        if (varBetween > varMax) {
+            varMax = varBetween;
+            threshold = t;
+        }
+    }
+
+    return threshold;
+}
+
+void MainWindow::on_actionBinariza_o_OTSU_triggered()
+{
+    sobelAtivo = false;
+
+    QImage gray = img;
+
+    // Convertendo para cinza
+    for (int i = 0; i < gray.height(); ++i) {
+        for (int j = 0; j < gray.width(); ++j) {
+            QRgb pixel = gray.pixel(j, i);
+            int cinza = qGray(pixel);
+            gray.setPixel(j, i, qRgb(cinza, cinza, cinza));
+        }
+    }
+
+    int threshold = otsuThreshold(gray);
+
+    QImage bin(gray.size(), QImage::Format_Grayscale8);
+
+    for (int i = 0; i < gray.height(); ++i) {
+        for (int j = 0; j < gray.width(); ++j) {
+            int val = qGray(gray.pixel(j, i));
+            int binVal = (val >= threshold) ? 255 : 0;
+            bin.setPixel(j, i, qRgb(binVal, binVal, binVal));
+        }
+    }
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(QPixmap::fromImage(bin).scaled(w, h, Qt::KeepAspectRatio));
+    res = bin;
+}
+
+
+void MainWindow::on_actionLimiariza_o_OTSU_triggered()
+{
+    sobelAtivo = false;
+
+    QImage gray = img;
+
+    // Convertendo para cinza
+    for (int i = 0; i < gray.height(); ++i) {
+        for (int j = 0; j < gray.width(); ++j) {
+            QRgb pixel = gray.pixel(j, i);
+            int cinza = qGray(pixel);
+            gray.setPixel(j, i, qRgb(cinza, cinza, cinza));
+        }
+    }
+
+    int threshold = otsuThreshold(gray);
+
+    QImage lim(gray.size(), QImage::Format_Grayscale8);
+
+    for (int i = 0; i < gray.height(); ++i) {
+        for (int j = 0; j < gray.width(); ++j) {
+            int val = qGray(gray.pixel(j, i));
+            int result = (val >= threshold) ? val : 0;
+            lim.setPixel(j, i, qRgb(result, result, result));
+        }
+    }
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(QPixmap::fromImage(lim).scaled(w, h, Qt::KeepAspectRatio));
+    res = lim;
+}
+

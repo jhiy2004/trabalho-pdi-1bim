@@ -215,6 +215,8 @@
     <addaction name="actionFiltro_do_ponto_m_dio"/>
     <addaction name="actionPseudo_Cores"/>
     <addaction name="actionEqualizar_HSL"/>
+    <addaction name="actionBinariza_o_OTSU"/>
+    <addaction name="actionLimiariza_o_OTSU"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -352,6 +354,16 @@
   <action name="actionEqualizar_HSL">
    <property name="text">
     <string>Equalizar HSL</string>
+   </property>
+  </action>
+  <action name="actionBinariza_o_OTSU">
+   <property name="text">
+    <string>Binarização OTSU</string>
+   </property>
+  </action>
+  <action name="actionLimiariza_o_OTSU">
+   <property name="text">
+    <string>Limiarização OTSU</string>
    </property>
   </action>
  </widget>
