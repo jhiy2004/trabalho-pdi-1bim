@@ -174,7 +174,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>21</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenu">
@@ -217,6 +217,7 @@
     <addaction name="actionEqualizar_HSL"/>
     <addaction name="actionBinariza_o_OTSU"/>
     <addaction name="actionLimiariza_o_OTSU"/>
+    <addaction name="actionComparar_laplaciano"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -364,6 +365,9 @@
   <action name="actionLimiariza_o_OTSU">
    <property name="text">
     <string>Limiarização OTSU</string>
+  <action name="actionComparar_laplaciano">
+   <property name="text">
+    <string>Comparar laplaciano</string>
    </property>
   </action>
  </widget>

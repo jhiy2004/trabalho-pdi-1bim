@@ -540,7 +540,35 @@ void MainWindow::on_actionRGB_para_HSV_triggered()
     }
 
     if(H < 0){
-        H += 360;
+        H += 360;    sobelAtivo = false;
+        QImage mod(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+
+        // Garante que o formato da imagem é compatível com setPixel()
+        if (mod.format() != QImage::Format_RGB32 && mod.format() != QImage::Format_ARGB32) {
+            mod = mod.convertToFormat(QImage::Format_RGB32);
+        }
+
+        for(int i=1; i < img.height() - 1; ++i){
+            for(int j=1; j < img.width() - 1; ++j){
+                int sum = 0;
+                sum += -qGray(img.pixel(j-1, i));
+                sum += -qGray(img.pixel(j, i-1));
+                sum +=  4*qGray(img.pixel(j, i));
+                sum += -qGray(img.pixel(j, i+1));
+                sum += -qGray(img.pixel(j+1, i));
+
+                int new_color = qBound(0, sum, 255);
+
+                mod.setPixel(j-1, i-1, qRgb(new_color, new_color, new_color));
+            }
+        }
+
+        QPixmap pix = QPixmap::fromImage(mod);
+
+        int w = ui->output_image->width();
+        int h = ui->output_image->height();
+        ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+        res = mod;
     }
 
     // Transformo em porcentagem
@@ -1375,5 +1403,92 @@ void MainWindow::on_actionLimiariza_o_OTSU_triggered()
     int h = ui->output_image->height();
     ui->output_image->setPixmap(QPixmap::fromImage(lim).scaled(w, h, Qt::KeepAspectRatio));
     res = lim;
+}
+
+void MainWindow::on_actionComparar_laplaciano_triggered()
+{
+    sobelAtivo = false;
+    QImage laplaciano(img.width() - 2, img.height() - 2, QImage::Format_RGB32);
+    QImage laplaciano_gauss(img.width() - 4, img.height() - 4, QImage::Format_RGB32);
+
+    // Laplaciano simples
+    for(int i=1; i < img.height() - 1; ++i){
+        for(int j=1; j < img.width() - 1; ++j){
+            int sum = 0;
+            sum += -qGray(img.pixel(j-1, i));
+            sum += -qGray(img.pixel(j, i-1));
+            sum +=  4*qGray(img.pixel(j, i));
+            sum += -qGray(img.pixel(j, i+1));
+            sum += -qGray(img.pixel(j+1, i));
+
+            int new_color = qBound(0, sum, 255);
+            laplaciano.setPixel(j-1, i-1, qRgb(new_color, new_color, new_color));
+        }
+    }
+
+    // Laplaciano do Gaussiano
+    for(int i=2; i < img.height() - 2; ++i){
+        for(int j=2; j < img.width() - 2; ++j){
+            int sum = 0;
+            sum += -qGray(img.pixel(j-2, i));
+
+            sum += -qGray(img.pixel(j-1, i-1));
+            sum += -2 * qGray(img.pixel(j-1, i));
+            sum += -qGray(img.pixel(j-1, i+1));
+
+            sum += -qGray(img.pixel(j, i-2));
+            sum += -2 * qGray(img.pixel(j, i-1));
+            sum += 16 * qGray(img.pixel(j, i));
+            sum += -2 * qGray(img.pixel(j, i+1));
+            sum += -qGray(img.pixel(j, i+2));
+
+            sum += -qGray(img.pixel(j+1, i-1));
+            sum += -2 * qGray(img.pixel(j+1, i));
+            sum += -qGray(img.pixel(j+1, i+1));
+
+            sum += -qGray(img.pixel(j+2, i));
+
+            int new_color = qBound(0, sum, 255);
+            laplaciano_gauss.setPixel(j-2, i-2, qRgb(new_color, new_color, new_color));
+        }
+    }
+
+    // Criação do diálogo
+    QDialog* dialog = new QDialog(this);
+    dialog->setWindowTitle("Comparando laplacianos");
+
+    QSize displaySize(400, 400);
+
+    // Imagens
+    QLabel* label1 = new QLabel(dialog);
+    label1->setPixmap(QPixmap::fromImage(laplaciano).scaled(displaySize, Qt::KeepAspectRatio));
+    label1->setAlignment(Qt::AlignCenter);
+
+    QLabel* label2 = new QLabel(dialog);
+    label2->setPixmap(QPixmap::fromImage(laplaciano_gauss).scaled(displaySize, Qt::KeepAspectRatio));
+    label2->setAlignment(Qt::AlignCenter);
+
+    // Legendas
+    QLabel* caption1 = new QLabel("Laplaciano", dialog);
+    caption1->setAlignment(Qt::AlignCenter);
+    QLabel* caption2 = new QLabel("Laplaciano do Gaussiano", dialog);
+    caption2->setAlignment(Qt::AlignCenter);
+
+    // Layouts individuais para imagem + legenda
+    QVBoxLayout* vbox1 = new QVBoxLayout();
+    vbox1->addWidget(label1);
+    vbox1->addWidget(caption1);
+
+    QVBoxLayout* vbox2 = new QVBoxLayout();
+    vbox2->addWidget(label2);
+    vbox2->addWidget(caption2);
+
+    // Layout horizontal para colocar os dois conjuntos lado a lado
+    QHBoxLayout* hbox = new QHBoxLayout();
+    hbox->addLayout(vbox1);
+    hbox->addLayout(vbox2);
+
+    dialog->setLayout(hbox);
+    dialog->exec(); // Modal
 }
 

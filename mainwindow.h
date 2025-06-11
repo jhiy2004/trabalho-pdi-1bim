@@ -98,6 +98,8 @@ private slots:
 
     void on_actionLimiariza_o_OTSU_triggered();
 
+    void on_actionComparar_laplaciano_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
