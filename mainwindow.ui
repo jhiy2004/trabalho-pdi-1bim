@@ -365,6 +365,8 @@
   <action name="actionLimiariza_o_OTSU">
    <property name="text">
     <string>Limiarização OTSU</string>
+   </property>
+  </action>
   <action name="actionComparar_laplaciano">
    <property name="text">
     <string>Comparar laplaciano</string>
