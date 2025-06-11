@@ -268,6 +268,11 @@ void MainWindow::on_output_to_input_btn_clicked()
     if(!dct_output.empty()){
         dct_input = dct_output;
     }
+    QPixmap pix = QPixmap::fromImage(img);
+
+    int w = ui->input_image->width();
+    int h = ui->input_image->height();
+    ui->input_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
 }
 
 
