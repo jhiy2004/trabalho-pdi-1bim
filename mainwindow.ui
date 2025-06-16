@@ -174,7 +174,7 @@
      <x>0</x>
      <y>0</y>
      <width>1280</width>
-     <height>24</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMenu">
@@ -218,6 +218,7 @@
     <addaction name="actionBinariza_o_OTSU"/>
     <addaction name="actionLimiariza_o_OTSU"/>
     <addaction name="actionComparar_laplaciano"/>
+    <addaction name="actionZhang_Suen"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuOpera_es"/>
@@ -370,6 +371,11 @@
   <action name="actionComparar_laplaciano">
    <property name="text">
     <string>Comparar laplaciano</string>
+   </property>
+  </action>
+  <action name="actionZhang_Suen">
+   <property name="text">
+    <string>Zhang Suen</string>
    </property>
   </action>
  </widget>

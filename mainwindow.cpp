@@ -2,6 +2,8 @@
 #include "./ui_mainwindow.h"
 #include <QMessageBox>
 #include <QMouseEvent>
+#include <QSet>
+#include <QQueue>
 
 struct DCTTask {
     const QImage& img;
@@ -1495,5 +1497,132 @@ void MainWindow::on_actionComparar_laplaciano_triggered()
 
     dialog->setLayout(hbox);
     dialog->exec(); // Modal
+}
+
+QImage MainWindow::zhangSuenThinning(const QImage& binaryImage) {
+    QImage thinnedImage = binaryImage.convertToFormat(QImage::Format_Grayscale8);
+    for (int y = 0; y < thinnedImage.height(); ++y) {
+        for (int x = 0; x < thinnedImage.width(); ++x) {
+            int gray = qGray(thinnedImage.pixel(x, y));
+            if (gray > 128) {
+                thinnedImage.setPixel(x, y, qRgb(255, 255, 255));
+            } else {
+                thinnedImage.setPixel(x, y, qRgb(0, 0, 0));
+            }
+        }
+    }
+
+    bool changed = true;
+    while (changed) {
+        changed = false;
+        QSet<QPoint> pixelsToDelete;
+        for (int y = 1; y < thinnedImage.height() - 1; ++y) {
+            for (int x = 1; x < thinnedImage.width() - 1; ++x) {
+                if (qGray(thinnedImage.pixel(x, y)) == 0) continue;
+
+                int p1 = qGray(thinnedImage.pixel(x, y)) / 255;
+                int p2 = qGray(thinnedImage.pixel(x, y - 1)) / 255;
+                int p3 = qGray(thinnedImage.pixel(x + 1, y - 1)) / 255;
+                int p4 = qGray(thinnedImage.pixel(x + 1, y)) / 255;
+                int p5 = qGray(thinnedImage.pixel(x + 1, y + 1)) / 255;
+                int p6 = qGray(thinnedImage.pixel(x, y + 1)) / 255;
+                int p7 = qGray(thinnedImage.pixel(x - 1, y + 1)) / 255;
+                int p8 = qGray(thinnedImage.pixel(x - 1, y)) / 255;
+                int p9 = qGray(thinnedImage.pixel(x - 1, y - 1)) / 255;
+
+                int N1 = 0;
+                if (p2 == 0 && p3 == 1) N1++;
+                if (p3 == 0 && p4 == 1) N1++;
+                if (p4 == 0 && p5 == 1) N1++;
+                if (p5 == 0 && p6 == 1) N1++;
+                if (p6 == 0 && p7 == 1) N1++;
+                if (p7 == 0 && p8 == 1) N1++;
+                if (p8 == 0 && p9 == 1) N1++;
+                if (p9 == 0 && p2 == 1) N1++;
+
+                int S1 = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+
+                if (S1 >= 2 && S1 <= 6 && N1 == 1 && (p2 * p4 * p6 == 0) && (p4 * p6 * p8 == 0)) {
+                    pixelsToDelete.insert(QPoint(x, y));
+                }
+            }
+        }
+
+        for (const QPoint& p : pixelsToDelete) {
+            thinnedImage.setPixel(p.x(), p.y(), qRgb(0, 0, 0));
+            changed = true;
+        }
+
+        pixelsToDelete.clear();
+        for (int y = 1; y < thinnedImage.height() - 1; ++y) {
+            for (int x = 1; x < thinnedImage.width() - 1; ++x) {
+                if (qGray(thinnedImage.pixel(x, y)) == 0) continue;
+
+                int p1 = qGray(thinnedImage.pixel(x, y)) / 255;
+                int p2 = qGray(thinnedImage.pixel(x, y - 1)) / 255;
+                int p3 = qGray(thinnedImage.pixel(x + 1, y - 1)) / 255;
+                int p4 = qGray(thinnedImage.pixel(x + 1, y)) / 255;
+                int p5 = qGray(thinnedImage.pixel(x + 1, y + 1)) / 255;
+                int p6 = qGray(thinnedImage.pixel(x, y + 1)) / 255;
+                int p7 = qGray(thinnedImage.pixel(x - 1, y + 1)) / 255;
+                int p8 = qGray(thinnedImage.pixel(x - 1, y)) / 255;
+                int p9 = qGray(thinnedImage.pixel(x - 1, y - 1)) / 255;
+
+
+                int N2 = 0;
+                if (p2 == 0 && p3 == 1) N2++;
+                if (p3 == 0 && p4 == 1) N2++;
+                if (p4 == 0 && p5 == 1) N2++;
+                if (p5 == 0 && p6 == 1) N2++;
+                if (p6 == 0 && p7 == 1) N2++;
+                if (p7 == 0 && p8 == 1) N2++;
+                if (p8 == 0 && p9 == 1) N2++;
+                if (p9 == 0 && p2 == 1) N2++;
+
+                int S2 = p2 + p3 + p4 + p5 + p6 + p7 + p8 + p9;
+
+                if (S2 >= 2 && S2 <= 6 && N2 == 1 && (p2 * p4 * p8 == 0) && (p2 * p6 * p8 == 0)) {
+                    pixelsToDelete.insert(QPoint(x, y));
+                }
+            }
+        }
+
+        for (const QPoint& p : pixelsToDelete) {
+            thinnedImage.setPixel(p.x(), p.y(), qRgb(0, 0, 0));
+            changed = true;
+        }
+    }
+    return thinnedImage;
+}
+
+void MainWindow::on_actionZhang_Suen_triggered()
+{
+    sobelAtivo = false;
+    if (img.isNull()) {
+        QMessageBox::warning(this, "Erro", "Carregue uma imagem primeiro.");
+        return;
+    }
+
+    QImage binaryImg = img.convertToFormat(QImage::Format_Grayscale8);
+    for (int y = 0; y < binaryImg.height(); ++y) {
+        for (int x = 0; x < binaryImg.width(); ++x) {
+            int gray = qGray(binaryImg.pixel(x, y));
+            if (gray > 128) {
+                binaryImg.setPixel(x, y, qRgb(255, 255, 255));
+            } else {
+                binaryImg.setPixel(x, y, qRgb(0, 0, 0));
+            }
+        }
+    }
+
+
+    QImage thinnedResult = zhangSuenThinning(binaryImg);
+
+    QPixmap pix = QPixmap::fromImage(thinnedResult);
+
+    int w = ui->output_image->width();
+    int h = ui->output_image->height();
+    ui->output_image->setPixmap(pix.scaled(w, h, Qt::KeepAspectRatio));
+    res = thinnedResult;
 }
 

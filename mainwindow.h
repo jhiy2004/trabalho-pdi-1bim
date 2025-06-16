@@ -100,7 +100,10 @@ private slots:
 
     void on_actionComparar_laplaciano_triggered();
 
+    void on_actionZhang_Suen_triggered();
+
 private:
     Ui::MainWindow *ui;
+    QImage zhangSuenThinning(const QImage& binaryImage);
 };
 #endif // MAINWINDOW_H
